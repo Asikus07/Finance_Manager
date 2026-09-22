@@ -15,4 +15,28 @@ class Category:
     id: str
     name: str
     parent_id: Optional[str]
-    type: str  # "income" или "expense"
+    type: str  
+
+@dataclass(frozen=True)
+class Transaction:
+    id: str
+    account_id: str
+    cat_id: str
+    amount: int
+    ts: str
+    note: str 
+
+@dataclass(frozen=True)
+class Budget:
+    id: str 
+    cat_id: str 
+    limit: int 
+    period: str 
+
+@dataclass(frozen=True)
+class Event:
+    id: str 
+    ts: str
+    name: str 
+    payload: dict
+    
