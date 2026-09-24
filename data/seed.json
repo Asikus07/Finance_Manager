@@ -1,0 +1,135 @@
+{
+    "accounts": [
+        {
+            "id": "acc_001",
+            "name": "Kaspi",
+            "balance": 150000,
+            "currency": "KZT"
+
+        },
+
+        {
+            "id": "acc_002",
+            "name": "Halyk",
+            "balance": 52000,
+            "currency": "KZT"
+        },
+
+        {
+            "id": "acc_003",
+            "name": "Freedom",
+            "balance": 25000,
+            "currency": "KZT"
+
+        }
+    ],
+
+    "categories": [
+    {
+        "id": "food",
+        "name": "Food",
+        "parent_id": null,
+        "type": "expense"
+    },
+
+    {
+        "id": "restaurants",
+        "name": "Restaurants",
+        "parent_id": "food",
+        "type": "expense"
+    },
+
+    {
+        "id": "groceries",
+        "name": "Groceries",
+        "parent_id": "food",
+        "type": "expense"
+    },
+
+    {
+        "id": "fast_food",
+        "name": "Fast Food",
+        "parent_id": "food",
+        "type": "expense"
+    },
+
+    {
+        "id": "transport",
+        "name": "Transport",
+        "parent_id": null,
+        "type": "expense"
+    },
+
+    {
+        "id": "taxi",
+        "name": "Taxi",
+        "parent_id": "transport",
+        "type": "expense"
+    },
+
+    {
+        "id": "bus",
+        "name": "Bus",
+        "parent_id": "transport",
+        "type": "expense"
+    },
+
+    {
+        "id": "car",
+        "name": "Car",
+        "parent_id": "transport",
+        "type": "expense"
+    },
+
+    {
+        "id": "fuel",
+        "name": "Fuel",
+        "parent_id": "car",
+        "type": "expense"
+    },
+
+    {
+        "id": "repair",
+        "name": "Repair",
+        "parent_id": "car",
+        "type": "expense"
+    },
+
+    {
+        "id": "leisure",
+        "name": "Leisure",
+        "parent_id": null,
+        "type": "expense"
+    },
+
+    {
+        "id": "games",
+        "name": "Games",
+        "parent_id": "leisure",
+        "type": "expense"
+    },
+
+    {
+        "id": "cinema",
+        "name": "Cinema",
+        "parent_id": "leisure",
+        "type": "expense"
+    },
+
+    {
+        "id": "entertainment",
+        "name": "Entertainment",
+        "parent_id": "leisure",
+        "type": "expense"
+    },
+
+    {
+        "id": "hobbies",
+        "name": "Hobbies",
+        "parent_id": "leisure",
+        "type": "expense"
+    }
+
+    ]
+
+}
