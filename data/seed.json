@@ -128,8 +128,14 @@
         "name": "Hobbies",
         "parent_id": "leisure",
         "type": "expense"
-    }
+    },
 
+    {
+        "id": "home",
+        "name": "Home",
+        "parent_id": null,
+        "type": "expense"
+    }
     ]
 
 }
