@@ -6,6 +6,10 @@ def load_data():
     with open("data/seed.json", "r", encoding="utf-8") as file:
         return json.load(file)
     
+def save_data(data):
+    with open("data/seed.json", "w", encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+    
 def create_transaction():
     transaction_id = input("Введите ID транзакции:")
     account_id = input("Введите ID аккаунта:")
@@ -27,14 +31,12 @@ def create_transaction():
 
     return transaction_dict
 
-    print(transaction)
-    print(transaction_dict)
-
+    
 
 if __name__ == "__main__":
     data = load_data()
     transaction_dict = create_transaction()
 
     data["transactions"].append(transaction_dict)
-
-    print(data["transactions"])
+    save_data(data)
+    
