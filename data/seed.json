@@ -179,6 +179,78 @@
             "amount": 7000000,
             "ts": "2026-05-28",
             "note": "купил машину"
+        },
+        {
+            "id": "tr_025",
+            "account_id": "acc_004",
+            "cat_id": "taxi",
+            "amount": 5000,
+            "ts": "2026-09-19",
+            "note": "Goto home"
+        },
+        {
+            "id": "tr_003",
+            "account_id": "acc_001",
+            "cat_id": "taxi",
+            "amount": 4000,
+            "ts": "2026-09-29",
+            "note": "Go to university"
+        },
+        {
+            "id": "tr_027",
+            "account_id": "acc_001",
+            "cat_id": "games",
+            "amount": 4000,
+            "ts": "2026-09-28",
+            "note": "пошли с друзьями в компы"
+        },
+        {
+            "id": "tr_027",
+            "account_id": "acc_001",
+            "cat_id": "games",
+            "amount": 4000,
+            "ts": "2026-09-28",
+            "note": "go with friend to computer club"
+        },
+        {
+            "id": "tr_028",
+            "account_id": "acc_002",
+            "cat_id": "games",
+            "amount": 5000,
+            "ts": "2026-09-30",
+            "note": "купил джойстик"
+        },
+        {
+            "id": "tr_030",
+            "account_id": "acc_001",
+            "cat_id": "home",
+            "amount": 5000,
+            "ts": "2026-09-30",
+            "note": "купил домой приборы"
+        },
+        {
+            "id": "tr_031",
+            "account_id": "acc_001",
+            "cat_id": "games",
+            "amount": 1000,
+            "ts": "2026-09-30",
+            "note": "Пошли с друзьями в пс клуб"
+        },
+        {
+            "id": "tr_032",
+            "account_id": "acc_001",
+            "cat_id": "games",
+            "amount": 4300,
+            "ts": "2026-09-28",
+            "note": "компы"
+        },
+        {
+            "id": "tr_033",
+            "account_id": "acc_001",
+            "cat_id": "taxi",
+            "amount": -4000,
+            "ts": "2026-10-01",
+            "note": "go to university"
         }
     ],
     "budjets": [
@@ -197,7 +269,7 @@
         {
             "id": "budjet_003",
             "cat_id": "car",
-            "limit": "50000",
+            "limit": 50000,
             "period": "month"
         }
     ]
