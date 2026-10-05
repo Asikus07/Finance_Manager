@@ -253,7 +253,7 @@
             "note": "go to university"
         }
     ],
-    "budjets": [
+    "budgets": [
         {
             "id": "budjet_001",
             "cat_id": "food",
