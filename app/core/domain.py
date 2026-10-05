@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -14,8 +13,9 @@ class Account:
 class Category:
     id: str
     name: str
-    parent_id: Optional[str]
-    type: str  
+    parent_id: str | None
+    type: str
+
 
 @dataclass(frozen=True)
 class Transaction:
@@ -24,19 +24,20 @@ class Transaction:
     cat_id: str
     amount: int
     ts: str
-    note: str 
+    note: str
+
 
 @dataclass(frozen=True)
 class Budget:
-    id: str 
-    cat_id: str 
-    limit: int 
-    period: str 
+    id: str
+    cat_id: str
+    limit: int
+    period: str
+
 
 @dataclass(frozen=True)
 class Event:
-    id: str 
+    id: str
     ts: str
-    name: str 
+    name: str
     payload: dict
-    
