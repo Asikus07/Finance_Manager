@@ -1,4 +1,5 @@
 import json
+from collections.abc import Callable
 from dataclasses import replace
 from functools import reduce
 
@@ -38,3 +39,15 @@ def load_seed(path: str) -> tuple[tuple, tuple, tuple, tuple]:
         tuple(Transaction(**t) for t in data["transactions"]),
         tuple(Budget(**b) for b in data["budgets"]),
     )
+
+
+def by_category(cat_id: str) -> Callable[[Transaction], bool]:
+    return lambda t: t.cat_id == cat_id
+
+
+def by_date_range(start: str, end: str) -> Callable[[Transaction], bool]:
+    return lambda t: start <= t.ts <= end
+
+
+def by_amount_range(min_amount: int, max_amount: int) -> Callable[[Transaction], bool]:
+    return lambda t: min_amount <= t.amount <= max_amount
