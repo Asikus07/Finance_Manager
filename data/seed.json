@@ -1,276 +1,948 @@
 {
-    "accounts": [
-        {
-            "id": "acc_001",
-            "name": "Kaspi",
-            "balance": 150000,
-            "currency": "KZT"
-        },
-        {
-            "id": "acc_002",
-            "name": "Halyk",
-            "balance": 52000,
-            "currency": "KZT"
-        },
-        {
-            "id": "acc_003",
-            "name": "Freedom",
-            "balance": 25000,
-            "currency": "KZT"
-        }
-    ],
-    "categories": [
-        {
-            "id": "food",
-            "name": "Food",
-            "parent_id": null,
-            "type": "expense"
-        },
-        {
-            "id": "restaurants",
-            "name": "Restaurants",
-            "parent_id": "food",
-            "type": "expense"
-        },
-        {
-            "id": "groceries",
-            "name": "Groceries",
-            "parent_id": "food",
-            "type": "expense"
-        },
-        {
-            "id": "fast_food",
-            "name": "Fast Food",
-            "parent_id": "food",
-            "type": "expense"
-        },
-        {
-            "id": "transport",
-            "name": "Transport",
-            "parent_id": null,
-            "type": "expense"
-        },
-        {
-            "id": "taxi",
-            "name": "Taxi",
-            "parent_id": "transport",
-            "type": "expense"
-        },
-        {
-            "id": "bus",
-            "name": "Bus",
-            "parent_id": "transport",
-            "type": "expense"
-        },
-        {
-            "id": "car",
-            "name": "Car",
-            "parent_id": "transport",
-            "type": "expense"
-        },
-        {
-            "id": "fuel",
-            "name": "Fuel",
-            "parent_id": "car",
-            "type": "expense"
-        },
-        {
-            "id": "repair",
-            "name": "Repair",
-            "parent_id": "car",
-            "type": "expense"
-        },
-        {
-            "id": "leisure",
-            "name": "Leisure",
-            "parent_id": null,
-            "type": "expense"
-        },
-        {
-            "id": "games",
-            "name": "Games",
-            "parent_id": "leisure",
-            "type": "expense"
-        },
-        {
-            "id": "cinema",
-            "name": "Cinema",
-            "parent_id": "leisure",
-            "type": "expense"
-        },
-        {
-            "id": "entertainment",
-            "name": "Entertainment",
-            "parent_id": "leisure",
-            "type": "expense"
-        },
-        {
-            "id": "hobbies",
-            "name": "Hobbies",
-            "parent_id": "leisure",
-            "type": "expense"
-        },
-        {
-            "id": "home",
-            "name": "Home",
-            "parent_id": null,
-            "type": "expense"
-        },
-        {
-            "id": "salary",
-            "name": "Salary",
-            "parent_id": null,
-            "type": "income"
-        }
-    ],
-    "transactions": [
-        {
-            "id": "tr_001",
-            "account_id": "acc_001",
-            "cat_id": "restaurants",
-            "amount": -2500,
-            "ts": "2026-09-01",
-            "note": "Обед"
-        },
-        {
-            "id": "tr_002",
-            "account_id": "acc_002",
-            "cat_id": "groceries",
-            "amount": -8000,
-            "ts": "2026-09-02",
-            "note": "Продукты"
-        },
-        {
-            "id": "tr_003",
-            "account_id": "acc_003",
-            "cat_id": "taxi",
-            "amount": -1800,
-            "ts": "2026-09-03",
-            "note": "Такси"
-        },
-        {
-            "id": "tr_004",
-            "account_id": "acc_001",
-            "cat_id": "salary",
-            "amount": 300000,
-            "ts": "2026-09-10",
-            "note": "Зарплата"
-        },
-        {
-            "id": "tr_005",
-            "account_id": "acc_002",
-            "cat_id": "bus",
-            "amount": -200,
-            "ts": "2026-09-05",
-            "note": "Автобус"
-        },
-        {
-            "id": "tr_022",
-            "account_id": "acc_001",
-            "cat_id": "bus",
-            "amount": 240,
-            "ts": "2026-09-29",
-            "note": "Поездка в универ"
-        },
-        {
-            "id": "tr_024",
-            "account_id": "acc_001",
-            "cat_id": "car",
-            "amount": 7000000,
-            "ts": "2026-05-28",
-            "note": "купил машину"
-        },
-        {
-            "id": "tr_025",
-            "account_id": "acc_004",
-            "cat_id": "taxi",
-            "amount": 5000,
-            "ts": "2026-09-19",
-            "note": "Goto home"
-        },
-        {
-            "id": "tr_003",
-            "account_id": "acc_001",
-            "cat_id": "taxi",
-            "amount": 4000,
-            "ts": "2026-09-29",
-            "note": "Go to university"
-        },
-        {
-            "id": "tr_027",
-            "account_id": "acc_001",
-            "cat_id": "games",
-            "amount": 4000,
-            "ts": "2026-09-28",
-            "note": "пошли с друзьями в компы"
-        },
-        {
-            "id": "tr_027",
-            "account_id": "acc_001",
-            "cat_id": "games",
-            "amount": 4000,
-            "ts": "2026-09-28",
-            "note": "go with friend to computer club"
-        },
-        {
-            "id": "tr_028",
-            "account_id": "acc_002",
-            "cat_id": "games",
-            "amount": 5000,
-            "ts": "2026-09-30",
-            "note": "купил джойстик"
-        },
-        {
-            "id": "tr_030",
-            "account_id": "acc_001",
-            "cat_id": "home",
-            "amount": 5000,
-            "ts": "2026-09-30",
-            "note": "купил домой приборы"
-        },
-        {
-            "id": "tr_031",
-            "account_id": "acc_001",
-            "cat_id": "games",
-            "amount": 1000,
-            "ts": "2026-09-30",
-            "note": "Пошли с друзьями в пс клуб"
-        },
-        {
-            "id": "tr_032",
-            "account_id": "acc_001",
-            "cat_id": "games",
-            "amount": 4300,
-            "ts": "2026-09-28",
-            "note": "компы"
-        },
-        {
-            "id": "tr_033",
-            "account_id": "acc_001",
-            "cat_id": "taxi",
-            "amount": -4000,
-            "ts": "2026-10-01",
-            "note": "go to university"
-        }
-    ],
-    "budgets": [
-        {
-            "id": "budjet_001",
-            "cat_id": "food",
-            "limit": 150000,
-            "period": "month"
-        },
-        {
-            "id": "budjet_002",
-            "cat_id": "leisure",
-            "limit": 100000,
-            "period": "three month"
-        },
-        {
-            "id": "budjet_003",
-            "cat_id": "car",
-            "limit": 50000,
-            "period": "month"
-        }
-    ]
+  "accounts": [
+    {
+      "id": "acc_001",
+      "name": "Kaspi",
+      "balance": 150000,
+      "currency": "KZT"
+    },
+    {
+      "id": "acc_002",
+      "name": "Halyk",
+      "balance": 52000,
+      "currency": "KZT"
+    },
+    {
+      "id": "acc_003",
+      "name": "Freedom",
+      "balance": 25000,
+      "currency": "KZT"
+    }
+  ],
+  "categories": [
+    {
+      "id": "food",
+      "name": "Food",
+      "parent_id": null,
+      "type": "expense"
+    },
+    {
+      "id": "restaurants",
+      "name": "Restaurants",
+      "parent_id": "food",
+      "type": "expense"
+    },
+    {
+      "id": "groceries",
+      "name": "Groceries",
+      "parent_id": "food",
+      "type": "expense"
+    },
+    {
+      "id": "fast_food",
+      "name": "Fast Food",
+      "parent_id": "food",
+      "type": "expense"
+    },
+    {
+      "id": "transport",
+      "name": "Transport",
+      "parent_id": null,
+      "type": "expense"
+    },
+    {
+      "id": "taxi",
+      "name": "Taxi",
+      "parent_id": "transport",
+      "type": "expense"
+    },
+    {
+      "id": "bus",
+      "name": "Bus",
+      "parent_id": "transport",
+      "type": "expense"
+    },
+    {
+      "id": "car",
+      "name": "Car",
+      "parent_id": "transport",
+      "type": "expense"
+    },
+    {
+      "id": "fuel",
+      "name": "Fuel",
+      "parent_id": "car",
+      "type": "expense"
+    },
+    {
+      "id": "repair",
+      "name": "Repair",
+      "parent_id": "car",
+      "type": "expense"
+    },
+    {
+      "id": "leisure",
+      "name": "Leisure",
+      "parent_id": null,
+      "type": "expense"
+    },
+    {
+      "id": "games",
+      "name": "Games",
+      "parent_id": "leisure",
+      "type": "expense"
+    },
+    {
+      "id": "cinema",
+      "name": "Cinema",
+      "parent_id": "leisure",
+      "type": "expense"
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "parent_id": "leisure",
+      "type": "expense"
+    },
+    {
+      "id": "hobbies",
+      "name": "Hobbies",
+      "parent_id": "leisure",
+      "type": "expense"
+    },
+    {
+      "id": "home",
+      "name": "Home",
+      "parent_id": null,
+      "type": "expense"
+    },
+    {
+      "id": "salary",
+      "name": "Salary",
+      "parent_id": null,
+      "type": "income"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "tr_001",
+      "account_id": "acc_001",
+      "cat_id": "fuel",
+      "amount": -8224,
+      "ts": "2026-09-15",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_002",
+      "account_id": "acc_001",
+      "cat_id": "groceries",
+      "amount": -19549,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_003",
+      "account_id": "acc_001",
+      "cat_id": "salary",
+      "amount": 221981,
+      "ts": "2026-10-03",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_004",
+      "account_id": "acc_003",
+      "cat_id": "bus",
+      "amount": -18056,
+      "ts": "2026-09-27",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_005",
+      "account_id": "acc_003",
+      "cat_id": "fuel",
+      "amount": -412,
+      "ts": "2026-09-11",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_006",
+      "account_id": "acc_002",
+      "cat_id": "fuel",
+      "amount": -5294,
+      "ts": "2026-09-14",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_007",
+      "account_id": "acc_002",
+      "cat_id": "fast_food",
+      "amount": -3239,
+      "ts": "2026-09-25",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_008",
+      "account_id": "acc_002",
+      "cat_id": "salary",
+      "amount": 122780,
+      "ts": "2026-09-30",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_009",
+      "account_id": "acc_002",
+      "cat_id": "groceries",
+      "amount": -18289,
+      "ts": "2026-09-19",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_010",
+      "account_id": "acc_003",
+      "cat_id": "games",
+      "amount": -19118,
+      "ts": "2026-09-13",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_011",
+      "account_id": "acc_001",
+      "cat_id": "car",
+      "amount": -9682,
+      "ts": "2026-09-06",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_012",
+      "account_id": "acc_001",
+      "cat_id": "cinema",
+      "amount": -9308,
+      "ts": "2026-09-30",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_013",
+      "account_id": "acc_002",
+      "cat_id": "taxi",
+      "amount": -12330,
+      "ts": "2026-09-23",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_014",
+      "account_id": "acc_002",
+      "cat_id": "groceries",
+      "amount": -5807,
+      "ts": "2026-10-05",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_015",
+      "account_id": "acc_001",
+      "cat_id": "hobbies",
+      "amount": -12633,
+      "ts": "2026-09-18",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_016",
+      "account_id": "acc_003",
+      "cat_id": "car",
+      "amount": -10826,
+      "ts": "2026-09-04",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_017",
+      "account_id": "acc_001",
+      "cat_id": "leisure",
+      "amount": -13345,
+      "ts": "2026-09-18",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_018",
+      "account_id": "acc_003",
+      "cat_id": "salary",
+      "amount": 211477,
+      "ts": "2026-10-02",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_019",
+      "account_id": "acc_003",
+      "cat_id": "hobbies",
+      "amount": -4881,
+      "ts": "2026-09-17",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_020",
+      "account_id": "acc_003",
+      "cat_id": "fuel",
+      "amount": -19355,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_021",
+      "account_id": "acc_002",
+      "cat_id": "games",
+      "amount": -7386,
+      "ts": "2026-09-09",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_022",
+      "account_id": "acc_001",
+      "cat_id": "restaurants",
+      "amount": -3792,
+      "ts": "2026-09-10",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_023",
+      "account_id": "acc_003",
+      "cat_id": "entertainment",
+      "amount": -19743,
+      "ts": "2026-09-05",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_024",
+      "account_id": "acc_003",
+      "cat_id": "hobbies",
+      "amount": -17538,
+      "ts": "2026-09-17",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_025",
+      "account_id": "acc_001",
+      "cat_id": "fast_food",
+      "amount": -17795,
+      "ts": "2026-09-18",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_026",
+      "account_id": "acc_002",
+      "cat_id": "fast_food",
+      "amount": -9817,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_027",
+      "account_id": "acc_001",
+      "cat_id": "fuel",
+      "amount": -16603,
+      "ts": "2026-09-12",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_028",
+      "account_id": "acc_001",
+      "cat_id": "repair",
+      "amount": -16835,
+      "ts": "2026-09-13",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_029",
+      "account_id": "acc_001",
+      "cat_id": "food",
+      "amount": -19826,
+      "ts": "2026-09-21",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_030",
+      "account_id": "acc_001",
+      "cat_id": "games",
+      "amount": -10276,
+      "ts": "2026-09-16",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_031",
+      "account_id": "acc_003",
+      "cat_id": "salary",
+      "amount": 144907,
+      "ts": "2026-10-02",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_032",
+      "account_id": "acc_003",
+      "cat_id": "transport",
+      "amount": -4407,
+      "ts": "2026-10-01",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_033",
+      "account_id": "acc_001",
+      "cat_id": "fuel",
+      "amount": -17490,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_034",
+      "account_id": "acc_003",
+      "cat_id": "bus",
+      "amount": -10414,
+      "ts": "2026-09-26",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_035",
+      "account_id": "acc_003",
+      "cat_id": "games",
+      "amount": -14555,
+      "ts": "2026-10-04",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_036",
+      "account_id": "acc_001",
+      "cat_id": "car",
+      "amount": -2298,
+      "ts": "2026-09-22",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_037",
+      "account_id": "acc_003",
+      "cat_id": "salary",
+      "amount": 215457,
+      "ts": "2026-09-01",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_038",
+      "account_id": "acc_003",
+      "cat_id": "salary",
+      "amount": 220031,
+      "ts": "2026-09-05",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_039",
+      "account_id": "acc_002",
+      "cat_id": "groceries",
+      "amount": -17047,
+      "ts": "2026-09-16",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_040",
+      "account_id": "acc_002",
+      "cat_id": "bus",
+      "amount": -17869,
+      "ts": "2026-09-09",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_041",
+      "account_id": "acc_003",
+      "cat_id": "home",
+      "amount": -8162,
+      "ts": "2026-10-01",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_042",
+      "account_id": "acc_001",
+      "cat_id": "fast_food",
+      "amount": -3376,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_043",
+      "account_id": "acc_002",
+      "cat_id": "hobbies",
+      "amount": -1975,
+      "ts": "2026-09-07",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_044",
+      "account_id": "acc_003",
+      "cat_id": "salary",
+      "amount": 157288,
+      "ts": "2026-09-16",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_045",
+      "account_id": "acc_003",
+      "cat_id": "hobbies",
+      "amount": -4793,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_046",
+      "account_id": "acc_002",
+      "cat_id": "car",
+      "amount": -2670,
+      "ts": "2026-09-29",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_047",
+      "account_id": "acc_003",
+      "cat_id": "fast_food",
+      "amount": -1857,
+      "ts": "2026-10-05",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_048",
+      "account_id": "acc_001",
+      "cat_id": "car",
+      "amount": -5649,
+      "ts": "2026-09-27",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_049",
+      "account_id": "acc_001",
+      "cat_id": "cinema",
+      "amount": -2121,
+      "ts": "2026-09-11",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_050",
+      "account_id": "acc_002",
+      "cat_id": "fuel",
+      "amount": -15109,
+      "ts": "2026-09-19",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_051",
+      "account_id": "acc_003",
+      "cat_id": "home",
+      "amount": -5272,
+      "ts": "2026-09-13",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_052",
+      "account_id": "acc_001",
+      "cat_id": "restaurants",
+      "amount": -10476,
+      "ts": "2026-09-04",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_053",
+      "account_id": "acc_002",
+      "cat_id": "salary",
+      "amount": 129821,
+      "ts": "2026-10-03",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_054",
+      "account_id": "acc_001",
+      "cat_id": "salary",
+      "amount": 135631,
+      "ts": "2026-09-16",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_055",
+      "account_id": "acc_003",
+      "cat_id": "car",
+      "amount": -19170,
+      "ts": "2026-09-03",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_056",
+      "account_id": "acc_002",
+      "cat_id": "leisure",
+      "amount": -8744,
+      "ts": "2026-09-14",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_057",
+      "account_id": "acc_002",
+      "cat_id": "car",
+      "amount": -8903,
+      "ts": "2026-09-26",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_058",
+      "account_id": "acc_003",
+      "cat_id": "repair",
+      "amount": -15182,
+      "ts": "2026-09-21",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_059",
+      "account_id": "acc_001",
+      "cat_id": "food",
+      "amount": -15217,
+      "ts": "2026-10-07",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_060",
+      "account_id": "acc_001",
+      "cat_id": "bus",
+      "amount": -16776,
+      "ts": "2026-09-17",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_061",
+      "account_id": "acc_002",
+      "cat_id": "groceries",
+      "amount": -8204,
+      "ts": "2026-09-24",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_062",
+      "account_id": "acc_002",
+      "cat_id": "repair",
+      "amount": -17532,
+      "ts": "2026-09-01",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_063",
+      "account_id": "acc_003",
+      "cat_id": "repair",
+      "amount": -3594,
+      "ts": "2026-09-09",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_064",
+      "account_id": "acc_001",
+      "cat_id": "transport",
+      "amount": -9124,
+      "ts": "2026-09-19",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_065",
+      "account_id": "acc_003",
+      "cat_id": "leisure",
+      "amount": -6871,
+      "ts": "2026-09-17",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_066",
+      "account_id": "acc_002",
+      "cat_id": "restaurants",
+      "amount": -3224,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_067",
+      "account_id": "acc_001",
+      "cat_id": "food",
+      "amount": -11129,
+      "ts": "2026-09-09",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_068",
+      "account_id": "acc_002",
+      "cat_id": "taxi",
+      "amount": -14678,
+      "ts": "2026-10-06",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_069",
+      "account_id": "acc_003",
+      "cat_id": "food",
+      "amount": -3865,
+      "ts": "2026-09-05",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_070",
+      "account_id": "acc_003",
+      "cat_id": "transport",
+      "amount": -18077,
+      "ts": "2026-09-03",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_071",
+      "account_id": "acc_003",
+      "cat_id": "transport",
+      "amount": -14283,
+      "ts": "2026-09-09",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_072",
+      "account_id": "acc_002",
+      "cat_id": "salary",
+      "amount": 287595,
+      "ts": "2026-09-14",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_073",
+      "account_id": "acc_003",
+      "cat_id": "fast_food",
+      "amount": -11789,
+      "ts": "2026-10-06",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_074",
+      "account_id": "acc_002",
+      "cat_id": "transport",
+      "amount": -7957,
+      "ts": "2026-09-11",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_075",
+      "account_id": "acc_001",
+      "cat_id": "entertainment",
+      "amount": -1012,
+      "ts": "2026-09-12",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_076",
+      "account_id": "acc_002",
+      "cat_id": "entertainment",
+      "amount": -8331,
+      "ts": "2026-09-18",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_077",
+      "account_id": "acc_003",
+      "cat_id": "fast_food",
+      "amount": -12735,
+      "ts": "2026-09-03",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_078",
+      "account_id": "acc_001",
+      "cat_id": "bus",
+      "amount": -15283,
+      "ts": "2026-09-23",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_079",
+      "account_id": "acc_001",
+      "cat_id": "car",
+      "amount": -975,
+      "ts": "2026-09-13",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_080",
+      "account_id": "acc_002",
+      "cat_id": "groceries",
+      "amount": -9346,
+      "ts": "2026-09-23",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_081",
+      "account_id": "acc_002",
+      "cat_id": "leisure",
+      "amount": -1104,
+      "ts": "2026-09-08",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_082",
+      "account_id": "acc_002",
+      "cat_id": "taxi",
+      "amount": -19224,
+      "ts": "2026-09-17",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_083",
+      "account_id": "acc_003",
+      "cat_id": "salary",
+      "amount": 281239,
+      "ts": "2026-09-21",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_084",
+      "account_id": "acc_003",
+      "cat_id": "fast_food",
+      "amount": -12822,
+      "ts": "2026-10-07",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_085",
+      "account_id": "acc_001",
+      "cat_id": "entertainment",
+      "amount": -255,
+      "ts": "2026-10-04",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_086",
+      "account_id": "acc_003",
+      "cat_id": "bus",
+      "amount": -12134,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_087",
+      "account_id": "acc_003",
+      "cat_id": "salary",
+      "amount": 264582,
+      "ts": "2026-09-08",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_088",
+      "account_id": "acc_002",
+      "cat_id": "repair",
+      "amount": -13582,
+      "ts": "2026-09-21",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_089",
+      "account_id": "acc_002",
+      "cat_id": "transport",
+      "amount": -6486,
+      "ts": "2026-09-27",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_090",
+      "account_id": "acc_002",
+      "cat_id": "taxi",
+      "amount": -18848,
+      "ts": "2026-09-20",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_091",
+      "account_id": "acc_001",
+      "cat_id": "repair",
+      "amount": -9601,
+      "ts": "2026-09-14",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_092",
+      "account_id": "acc_003",
+      "cat_id": "leisure",
+      "amount": -15436,
+      "ts": "2026-09-29",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_093",
+      "account_id": "acc_001",
+      "cat_id": "home",
+      "amount": -5760,
+      "ts": "2026-09-06",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_094",
+      "account_id": "acc_003",
+      "cat_id": "leisure",
+      "amount": -3260,
+      "ts": "2026-09-16",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_095",
+      "account_id": "acc_001",
+      "cat_id": "bus",
+      "amount": -5028,
+      "ts": "2026-09-02",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_096",
+      "account_id": "acc_002",
+      "cat_id": "salary",
+      "amount": 338769,
+      "ts": "2026-09-27",
+      "note": "Доход"
+    },
+    {
+      "id": "tr_097",
+      "account_id": "acc_003",
+      "cat_id": "bus",
+      "amount": -12782,
+      "ts": "2026-10-02",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_098",
+      "account_id": "acc_001",
+      "cat_id": "food",
+      "amount": -3692,
+      "ts": "2026-09-28",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_099",
+      "account_id": "acc_003",
+      "cat_id": "hobbies",
+      "amount": -1845,
+      "ts": "2026-10-06",
+      "note": "Расход"
+    },
+    {
+      "id": "tr_100",
+      "account_id": "acc_001",
+      "cat_id": "hobbies",
+      "amount": -4569,
+      "ts": "2026-09-30",
+      "note": "Расход"
+    }
+  ],
+  "budgets": [
+    {
+      "id": "budjet_001",
+      "cat_id": "food",
+      "limit": 150000,
+      "period": "month"
+    },
+    {
+      "id": "budjet_002",
+      "cat_id": "leisure",
+      "limit": 100000,
+      "period": "three month"
+    },
+    {
+      "id": "budjet_003",
+      "cat_id": "car",
+      "limit": 50000,
+      "period": "month"
+    }
+  ]
 }
