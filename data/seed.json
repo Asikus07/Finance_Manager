@@ -927,19 +927,19 @@
   ],
   "budgets": [
     {
-      "id": "budjet_001",
+      "id": "budget_001",
       "cat_id": "food",
       "limit": 150000,
       "period": "month"
     },
     {
-      "id": "budjet_002",
+      "id": "budget_002",
       "cat_id": "leisure",
       "limit": 100000,
-      "period": "three month"
+      "period": "month"
     },
     {
-      "id": "budjet_003",
+      "id": "budget_003",
       "cat_id": "car",
       "limit": 50000,
       "period": "month"
