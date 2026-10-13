@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import streamlit as st
-
 from core.recursion import flatten_categories, sum_expenses_recursive
 from core.transforms import (
     account_balance,

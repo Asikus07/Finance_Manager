@@ -3,7 +3,8 @@ import random
 from datetime import date, timedelta
 
 random.seed(42)
-data = json.load(open("data/seed.json", encoding="utf-8"))
+with open("data/seed.json", encoding="utf-8") as f:
+    data = json.load(f)
 
 account_ids = [a["id"] for a in data["accounts"]]
 expense_cats = [c["id"] for c in data["categories"] if c["type"] == "expense"]
@@ -25,6 +26,5 @@ def make_tx(i):
 
 
 data["transactions"] = [make_tx(i) for i in range(1, 101)]
-json.dump(
-    data, open("data/seed.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2
-)
+with open("data/seed.json", "w", encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)

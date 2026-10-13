@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import NamedTuple
 
 
 @dataclass(frozen=True)
@@ -17,8 +18,7 @@ class Category:
     type: str
 
 
-@dataclass(frozen=True)
-class Transaction:
+class Transaction(NamedTuple):
     id: str
     account_id: str
     cat_id: str

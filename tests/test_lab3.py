@@ -1,7 +1,6 @@
 from core.domain import Transaction
 from core.memo import forecast_expenses, forecast_raw, last_months, measure_ms, month_of
 
-
 TRANS = (
     Transaction("t1", "acc_001", "taxi", -1000, "2026-09-05", ""),
     Transaction("t2", "acc_001", "taxi", -3000, "2026-09-20", ""),
@@ -39,3 +38,18 @@ def test_forecast_raw_empty_is_zero():
     assert forecast_raw("taxi", (), 3) == 0
 
 
+def test_forecast_expenses_uses_cache():
+    forecast_expenses.cache_clear()
+    first = forecast_expenses("taxi", TRANS, 2)
+    second = forecast_expenses("taxi", TRANS, 2)
+    third = forecast_expenses("taxi", TRANS, 2)
+    info = forecast_expenses.cache_info()
+    assert first == second == third == 3000
+    assert info.hits == 2
+    assert info.misses == 1
+
+
+def test_measure_ms_returns_result_and_time():
+    result, ms = measure_ms(forecast_raw, "taxi", TRANS, 2)
+    assert result == 3000
+    assert ms >= 0
