@@ -22,21 +22,26 @@ def month_spent(cat_id: str, trans: tuple[Transaction, ...], month: str) -> int:
     )
 
 
-def sum_by_months(cat_id: str, trans: tuple[Transaction, ...], months: tuple[str, ...]) -> int:
+def sum_by_months(
+    cat_id: str, trans: tuple[Transaction, ...], months: tuple[str, ...]
+) -> int:
     if not months:
         return 0
-    return month_spent(cat_id, trans, months[0]) + sum_by_months(cat_id, trans, months[1:]) 
+    (
+        head,
+        rest,
+    ) = (
+        months[0],
+        months[1:],
+    )
+    return month_spent(cat_id, trans, head) + sum_by_months(cat_id, trans, rest)
+
 
 def forecast_raw(cat_id: str, trans: tuple[Transaction, ...], period: int) -> int:
     months = last_months(trans, period)
     if not months:
         return 0
-    spent = sum(
-        -t.amount
-        for t in trans
-        if t.cat_id == cat_id and t.amount < 0 and month_of(t) in months
-    )
-    return spent // len(months)
+    return sum_by_months(cat_id, trans, months) // len(months)
 
 
 @lru_cache
