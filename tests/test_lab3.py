@@ -1,13 +1,19 @@
 from core.domain import Transaction
-from core.memo import forecast_expenses, forecast_raw, last_months, measure_ms, month_of
-
+from core.memo import (
+    forecast_expenses,
+    forecast_raw,
+    last_months,
+    measure_ms,
+    month_of,
+    sum_by_months,
+)
 
 TRANS = (
     Transaction("t1", "acc_001", "taxi", -1000, "2026-09-05", ""),
     Transaction("t2", "acc_001", "taxi", -3000, "2026-09-20", ""),
     Transaction("t3", "acc_001", "taxi", -2000, "2026-10-03", ""),
     Transaction("t4", "acc_001", "bus", -500, "2026-10-10", ""),
-    Transaction("t4", "acc_001", "taxi", 700, "2026-10-11", "refund"),
+    Transaction("t5", "acc_001", "taxi", 700, "2026-10-11", "refund"),
 )
 
 
@@ -39,3 +45,23 @@ def test_forecast_raw_empty_is_zero():
     assert forecast_raw("taxi", (), 3) == 0
 
 
+def test_forecast_expenses_uses_cache():
+    forecast_expenses.cache_clear()
+    first = forecast_expenses("taxi", TRANS, 2)
+    second = forecast_expenses("taxi", TRANS, 2)
+    third = forecast_expenses("taxi", TRANS, 2)
+    info = forecast_expenses.cache_info()
+    assert first == second == third == 3000
+    assert info.hits == 2
+    assert info.misses == 1
+
+
+def test_measure_ms_returns_result_and_time():
+    result, ms = measure_ms(forecast_raw, "taxi", TRANS, 2)
+    assert result == 3000
+    assert ms >= 0
+
+
+def test_sum_by_months_recursive():
+    assert sum_by_months("taxi", TRANS, ("2026-09", "2026-10")) == 6000
+    assert sum_by_months("taxi", TRANS, ()) == 0
