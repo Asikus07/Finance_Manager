@@ -7,7 +7,8 @@ from uuid import uuid4
 import altair as alt
 import pandas as pd
 import streamlit as st
-from core.domain import Transaction
+from core.domain import Account, Category, Transaction
+from core.ftypes import Left, Right
 from core.memo import forecast_expenses, forecast_raw, last_months, measure_ms
 from core.recursion import flatten_categories, sum_expenses_recursive
 from core.transforms import (
@@ -18,6 +19,7 @@ from core.transforms import (
     by_date_range,
     load_seed,
 )
+from core.validation import check_budget, in_period, validation_pipeline
 
 st.set_page_config(
     page_title="FinManager",
@@ -603,6 +605,87 @@ def page_data():
         st.altair_chart(bars, width="stretch")
 
 
+UNKNOWN_ACCOUNT = Account("acc_999", "⚠ Unknown account (acc_999)", 0, "KZT")
+UNKNOWN_CATEGORY = Category("ghost", "⚠ Unknown category (ghost)", None, "expense")
+
+ERROR_TEXT = {
+    "account_not_found": "Account does not exist",
+    "amount_is_zero": "Amount must not be zero",
+    "category_not_found": "Category does not exist",
+    "category_type_mismatch": "Category type does not match the amount sign",
+    "budget_exceeded": "Budget would be exceeded",
+}
+
+
+def error_text(error):
+    text = ERROR_TEXT.get(error["error"], error["error"])
+    if error["error"] == "budget_exceeded":
+        text += f": {money(error['spent'])} of {money(error['limit'])}"
+    return text
+
+
+def render_validation_pipeline():
+    accounts, cats, trans, budgets = get_data()
+
+    st.divider()
+    st.subheader("Transaction validation pipeline")
+    st.caption(
+        "Every step returns Right(transaction) or Left(error). "
+        "bind runs the next step only after a Right, so the first error stops the chain."
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+    account = c1.selectbox(
+        "Account",
+        accounts + (UNKNOWN_ACCOUNT,),
+        format_func=lambda a: a.name,
+        key="val_account",
+    )
+    category = c2.selectbox(
+        "Category",
+        cats + (UNKNOWN_CATEGORY,),
+        format_func=lambda c: c.name,
+        key="val_category",
+    )
+    amount = c3.number_input(
+        "Amount (minus = expense)", value=-1000, step=500, key="val_amount"
+    )
+    latest = max(
+        (t.ts for t in trans), default=datetime.now().astimezone().date().isoformat()
+    )
+    day = c4.date_input("Date", value=date.fromisoformat(latest), key="val_date")
+
+    t = Transaction(
+        id=f"tx_{uuid4().hex[:8]}",
+        account_id=account.id,
+        cat_id=category.id,
+        amount=int(amount),
+        ts=day.isoformat(),
+        note="",
+    )
+
+    result = Right(t)
+    for name, step in validation_pipeline(accounts, cats, trans, budgets):
+        if isinstance(result, Left):
+            st.markdown(f"⏭ {name} — skipped")
+            continue
+        result = result.bind(step)
+        if isinstance(result, Left):
+            st.markdown(f"❌ **{name}** — {error_text(result.error)}")
+        else:
+            st.markdown(f"✅ {name}")
+
+    if isinstance(result, Left):
+        st.error("Left: transaction rejected")
+        st.json(result.error)
+        return
+
+    st.success("Right: transaction is valid")
+    if st.button("Add to data", type="primary", key="val_add"):
+        st.session_state.data = (accounts, cats, add_transaction(trans, t), budgets)
+        st.rerun()
+
+
 def page_core():
     st.title("Functional Core")
     _, cats, trans, _ = get_data()
@@ -635,6 +718,8 @@ def page_core():
     ]
 
     st.dataframe(rows, hide_index=True, use_container_width=True)
+
+    render_validation_pipeline()
 
 
 def page_pipelines():
@@ -728,13 +813,6 @@ def next_month(m):
 def status_color(ratio):
     """Зелёный до 80% лимита, жёлтый 80-100%, красный от 100%."""
     return RED if ratio >= 1 else AMBER if ratio >= 0.8 else GREEN
-
-
-def in_period(ts, period, latest):
-    """Попадает ли дата в текущий период бюджета (месяц или последние 7 дней)."""
-    if period == "week":
-        return 0 <= (date.fromisoformat(latest) - date.fromisoformat(ts)).days < 7
-    return ts[:7] == latest[:7]
 
 
 def budget_spent(b, cats, trans, latest):
@@ -1029,6 +1107,18 @@ def page_reports():
                 f'<div class="note-pill">{escape(note)}</div>',
                 unsafe_allow_html=True,
             )
+
+            with st.expander("Budget check (Either)"):
+                for b, _ in status:
+                    name = by_id[b.cat_id].name if b.cat_id in by_id else b.cat_id
+                    checked = check_budget(b, trans, cats)
+                    if isinstance(checked, Left):
+                        e = checked.error
+                        st.markdown(
+                            f"❌ **{name}** — {money(e['spent'])} of {money(e['limit'])}"
+                        )
+                    else:
+                        st.markdown(f"✅ {name}")
 
 
 PAGES = {

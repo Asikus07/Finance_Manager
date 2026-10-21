@@ -38,7 +38,8 @@ Finance_Manager/
 │       ├── transforms.py  # чистые функции и замыкания-фильтры
 │       ├── recursion.py   # обход иерархии категорий
 │       ├── memo.py        # прогноз расходов + lru_cache + замер времени
-│       ├── ftypes.py      # Maybe / Either (лаба 4, пока пусто)
+│       ├── ftypes.py      # Maybe / Either: map, bind, get_or_else
+│       ├── validation.py  # проверка транзакции и бюджета на Maybe/Either
 │       ├── lazy.py        # ленивые вычисления (лаба 5, пока пусто)
 │       ├── frp.py         # шина событий (лаба 6, пока пусто)
 │       ├── compose.py     # compose / pipe (лаба 7, пока пусто)
@@ -49,7 +50,8 @@ Finance_Manager/
 ├── tests/
 │   ├── test_lab1.py
 │   ├── test_lab2.py
-│   └── test_lab3.py
+│   ├── test_lab3.py
+│   └── test_lab4.py
 ├── .streamlit/config.toml # тёмная тема
 ├── generate.py            # TODO: описать назначение
 ├── pyproject.toml         # настройки pytest
@@ -65,7 +67,7 @@ Finance_Manager/
 | 1 | Чистые функции, неизменяемость, HOF | Overview, Data | Overview: счётчики и баланс. Data: кнопка **+ Add transaction** | `load_seed`, `add_transaction`, `update_budget`, `account_balance` в `core/transforms.py` | `tests/test_lab1.py` |
 | 2 | Замыкания и рекурсия | Functional Core, Pipelines | Functional Core: выбор категории и расходы по дереву. Pipelines: фильтры | `by_category`, `by_date_range`, `by_amount_range` в `core/transforms.py`; `flatten_categories`, `sum_expenses_recursive` в `core/recursion.py` | `tests/test_lab2.py` |
 | 3 | Мемоизация | Reports | Reports → блок **Forecast (cached)** → кнопка **Measure cache** | `forecast_expenses` (`@lru_cache`), `forecast_raw`, `measure_ms` в `core/memo.py` | `tests/test_lab3.py` |
-| 4 | Maybe / Either | не реализована | | | |
+| 4 | Maybe / Either | Functional Core, Reports | Functional Core → внизу **Transaction validation pipeline**: выберите счёт, категорию и сумму, шаги проверки покажут ✅ / ❌ / ⏭. Варианты с ⚠ в списках дают заведомо неверные данные. Reports → **Budget check (Either)** | `Just/Nothing`, `Right/Left` в `core/ftypes.py`; `safe_category`, `validate_transaction`, `check_budget` в `core/validation.py` | `tests/test_lab4.py` |
 
 ## Описание основных функций
 
@@ -80,6 +82,10 @@ Finance_Manager/
 - `sum_expenses_recursive(cats, trans, root_id)` рекурсивно суммирует расходы по ветке категорий.
 - `forecast_expenses(cat_id, trans, period)` среднемесячные расходы за последние `period` месяцев, результат кэшируется (`lru_cache`, поэтому `trans` обязан быть кортежем).
 - `measure_ms(func, *args)` возвращает пару `(результат, время в мс)`.
+- `Just(x)` / `Nothing()` (Maybe) и `Right(x)` / `Left(err)` (Either) имеют методы `map`, `bind`, `get_or_else`; ошибки и отсутствие значения передаются через контейнеры, без `try/except` и `None`.
+- `safe_category(cats, cat_id)` возвращает `Just(категория)` или `Nothing()`.
+- `validate_transaction(t, accs, cats)` возвращает `Right(t)` или `Left({...})`: счёт существует, сумма не 0, категория существует и подходит по знаку.
+- `check_budget(b, trans, cats)` возвращает `Right(b)` или `Left({...})`, если расходы за период превысили лимит.
 
 ## Данные
 
