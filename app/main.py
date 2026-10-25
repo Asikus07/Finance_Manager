@@ -6,7 +6,8 @@ from uuid import uuid4
 import altair as alt
 import pandas as pd
 import streamlit as st
-from core.domain import Transaction
+from core.domain import Account, Category, Transaction
+from core.ftypes import Left, Nothing, Right, Some
 from core.memo import forecast_expenses, forecast_raw, last_months, measure_ms
 from core.recursion import flatten_categories, sum_expenses_recursive
 from core.transforms import (
@@ -17,6 +18,7 @@ from core.transforms import (
     by_date_range,
     load_seed,
 )
+from core.validation import check_account, check_budget, check_category
 
 st.set_page_config(
     page_title="FinManager",
@@ -606,6 +608,124 @@ def page_data():
         st.altair_chart(bars, width="stretch")
 
 
+def budget_view(b, cats, trans):
+    """Транзакции бюджета за его период. Подкатегории сводятся к категории бюджета,
+    потому что check_budget считает расходы по точному cat_id."""
+    ids = {c.id for c in flatten_categories(cats, b.cat_id)}
+    latest = max((t.ts for t in trans), default="")
+    return tuple(
+        t._replace(cat_id=b.cat_id)
+        for t in trans
+        if t.cat_id in ids and in_period(t.ts, b.period, latest)
+    )
+
+
+def budget_step(cats, trans, budgets):
+    """Шаг пайплайна: новая трата не должна превысить бюджет своей категории."""
+
+    def step(t):
+        if t.amount >= 0:
+            return Right(t)
+        covering = next(
+            (
+                b
+                for b in budgets
+                if t.cat_id in {c.id for c in flatten_categories(cats, b.cat_id)}
+            ),
+            None,
+        )
+        found = Some(covering) if covering else Nothing()
+        return found.map(
+            lambda b: check_budget(
+                b, budget_view(b, cats, add_transaction(trans, t))
+            ).map(lambda _: t)
+        ).get_or_else(Right(t))
+
+    return step
+
+
+UNKNOWN_ACCOUNT = Account("acc_999", "⚠ Unknown account (acc_999)", 0, "KZT")
+UNKNOWN_CATEGORY = Category("ghost", "⚠ Unknown category (ghost)", None, "expense")
+
+
+def error_text(error):
+    text = error["error"]
+    if "spent" in error:
+        text += f" {money(error['spent'])} of {money(error['limit'])}"
+    return text
+
+
+def render_validation_pipeline():
+    accounts, cats, trans, budgets = get_data()
+
+    st.divider()
+    st.subheader("Transaction validation pipeline")
+    st.caption(
+        "Every step returns Right(transaction) or Left(error). "
+        "bind runs the next step only after a Right, so the first error stops the chain."
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+    account = c1.selectbox(
+        "Account",
+        accounts + (UNKNOWN_ACCOUNT,),
+        format_func=lambda a: a.name,
+        key="val_account",
+    )
+    category = c2.selectbox(
+        "Category",
+        cats + (UNKNOWN_CATEGORY,),
+        format_func=lambda c: c.name,
+        key="val_category",
+    )
+    amount = c3.number_input(
+        "Amount (minus = expense)", value=-1000, step=500, key="val_amount"
+    )
+    latest = max(
+        (t.ts for t in trans), default=datetime.now().astimezone().date().isoformat()
+    )
+    day = c4.date_input("Date", value=date.fromisoformat(latest), key="val_date")
+
+    t = Transaction(
+        id=f"tx_{uuid4().hex[:8]}",
+        account_id=account.id,
+        cat_id=category.id,
+        amount=int(amount),
+        ts=day.isoformat(),
+        note="",
+    )
+
+    steps = (
+        ("Account exists", lambda x: check_account(x, accounts)),
+        (
+            "Category exists and matches the amount sign",
+            lambda x: check_category(x, cats),
+        ),
+        ("Budget is not exceeded", budget_step(cats, trans, budgets)),
+    )
+
+    result = Right(t)
+    for name, step in steps:
+        if isinstance(result, Left):
+            st.markdown(f"⏭ {name} — skipped")
+            continue
+        result = result.bind(step)
+        if isinstance(result, Left):
+            st.markdown(f"❌ **{name}** — {error_text(result.error)}")
+        else:
+            st.markdown(f"✅ {name}")
+
+    if isinstance(result, Left):
+        st.error("Left: transaction rejected")
+        st.json(result.error)
+        return
+
+    st.success("Right: transaction is valid")
+    if st.button("Add to data", type="primary", key="val_add"):
+        st.session_state.data = (accounts, cats, add_transaction(trans, t), budgets)
+        st.rerun()
+
+
 def page_core():
     st.title("Functional Core")
     _, cats, trans, _ = get_data()
@@ -638,6 +758,8 @@ def page_core():
     ]
 
     st.dataframe(rows, hide_index=True, use_container_width=True)
+
+    render_validation_pipeline()
 
 
 def page_pipelines():
@@ -993,43 +1115,56 @@ def page_reports():
             m3.metric("Speedup", f"×{bench['raw'] / max(bench['cached'], 1e-9):.1f}")
             st.caption(f"lru_cache: {bench['hits']} hits, {bench['misses']} misses")
 
-    with right:
-        with st.container(border=True):
-            st.subheader("Monthly budget overview")
-            if not status:
-                st.info("No budgets have been configured.")
-            else:
-                cards = (
-                    budget_card(
-                        by_id[b.cat_id].name if b.cat_id in by_id else b.cat_id,
-                        spent,
-                        b.limit,
-                        root_color.get(root_id(by_id, b.cat_id), NEUTRAL),
-                    )
-                    for b, spent in status
+    with right, st.container(border=True):
+        st.subheader("Monthly budget overview")
+        if not status:
+            st.info("No budgets have been configured.")
+        else:
+            cards = (
+                budget_card(
+                    by_id[b.cat_id].name if b.cat_id in by_id else b.cat_id,
+                    spent,
+                    b.limit,
+                    root_color.get(root_id(by_id, b.cat_id), NEUTRAL),
                 )
-                st.markdown(
-                    '<div class="budget-grid">' + "".join(cards) + "</div>",
-                    unsafe_allow_html=True,
-                )
+                for b, spent in status
+            )
+            st.markdown(
+                '<div class="budget-grid">' + "".join(cards) + "</div>",
+                unsafe_allow_html=True,
+            )
 
-                worst, worst_spent = max(
-                    status, key=lambda p: p[1] / p[0].limit if p[0].limit > 0 else 0
+            worst, worst_spent = max(
+                status, key=lambda p: p[1] / p[0].limit if p[0].limit > 0 else 0
+            )
+            worst_name = (
+                by_id[worst.cat_id].name if worst.cat_id in by_id else worst.cat_id
+            )
+            worst_ratio = worst_spent / worst.limit if worst.limit > 0 else 0
+            if worst_ratio >= 1:
+                note = f"The {worst_name} budget is exceeded. Consider reviewing your spending."
+            elif worst_ratio >= 0.8:
+                note = (
+                    f"You're close to exceeding your {worst_name} budget this period."
                 )
-                worst_name = (
-                    by_id[worst.cat_id].name if worst.cat_id in by_id else worst.cat_id
-                )
-                worst_ratio = worst_spent / worst.limit if worst.limit > 0 else 0
-                if worst_ratio >= 1:
-                    note = f"The {worst_name} budget is exceeded. Consider reviewing your spending."
-                elif worst_ratio >= 0.8:
-                    note = f"You're close to exceeding your {worst_name} budget this period."
-                else:
-                    note = "All budgets are on track."
-                st.markdown(
-                    f'<div class="note-pill">{escape(note)}</div>',
-                    unsafe_allow_html=True,
-                )
+            else:
+                note = "All budgets are on track."
+            st.markdown(
+                f'<div class="note-pill">{escape(note)}</div>',
+                unsafe_allow_html=True,
+            )
+
+            with st.expander("Budget check (Either)"):
+                for b, _ in status:
+                    name = by_id[b.cat_id].name if b.cat_id in by_id else b.cat_id
+                    checked = check_budget(b, budget_view(b, cats, trans))
+                    if isinstance(checked, Left):
+                        e = checked.error
+                        st.markdown(
+                            f"❌ **{name}** — {money(e['spent'])} of {money(e['limit'])}"
+                        )
+                    else:
+                        st.markdown(f"✅ {name}")
 
 
 PAGES = {
