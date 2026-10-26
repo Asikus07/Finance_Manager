@@ -608,6 +608,92 @@ def page_data():
         st.altair_chart(bars, width="stretch")
 
 
+CORE_CSS = """
+<style>
+.sec-head { margin:6px 0 14px; }
+.sec-eyebrow { font-size:11px; letter-spacing:1.3px; text-transform:uppercase; color:#55CF7A; font-weight:700; }
+.sec-title { font-size:22px; font-weight:750; letter-spacing:-.5px; color:#F1F5F2; margin-top:2px; }
+.sec-sub { font-size:13px; color:#A0AAA2; margin-top:4px; }
+.bd-row { display:grid; grid-template-columns:1fr auto; gap:7px 16px; padding:12px 4px; border-bottom:1px dashed #2E352F; }
+.bd-row:last-child { border-bottom:none; }
+.bd-name { color:#E8ECE9; font-weight:600; display:flex; align-items:center; gap:9px; }
+.bd-name .dot { flex-shrink:0; }
+.bd-sub { color:#8FA396; font-size:12px; font-weight:500; }
+.bd-amount { font-weight:750; color:#F1F5F2; text-align:right; }
+.bd-track { grid-column:1 / -1; height:6px; border-radius:99px; background:#232B26; overflow:hidden; }
+.bd-fill { height:100%; border-radius:99px; }
+.chip { font-size:10px; letter-spacing:.6px; text-transform:uppercase; padding:2px 9px; border-radius:999px; border:1px solid; font-weight:700; flex-shrink:0; }
+.sc-label { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#8FA396; font-weight:700; margin:2px 0 8px; }
+.card-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.card-num { width:28px; height:28px; border-radius:9px; background:#55CF7A22; border:1px solid #55CF7A55; color:#55CF7A; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:13px; }
+.card-title { font-size:17px; font-weight:700; color:#F1F5F2; }
+.card-sub { font-size:12px; color:#8FA396; }
+.hint { display:flex; align-items:center; gap:10px; background:#101311; border:1px solid #292F2B; border-radius:12px; padding:10px 12px; margin:-4px 0 14px; font-size:12px; color:#A0AAA2; }
+.steps { display:flex; flex-direction:column; gap:10px; margin:6px 0 14px; }
+.step { display:flex; gap:14px; align-items:flex-start; padding:14px 16px; border-radius:14px; border:1px solid #292F2B; background:#101311; transition:transform .15s; }
+.step-ico { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; flex-shrink:0; font-size:14px; color:#0B0D0C; }
+.step-body { min-width:0; flex:1; }
+.step-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.step-name { font-weight:700; color:#E8ECE9; }
+.step-fn { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11.5px; color:#8FA396; margin-top:2px; }
+.step-msg { font-size:13px; margin-top:8px; }
+.badge { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; border:1px solid; white-space:nowrap; }
+.step[data-state="ok"] { border-color:#3FA95C66; background:#3FA95C12; }
+.step[data-state="ok"] .step-ico { background:#55CF7A; }
+.step[data-state="ok"] .badge { color:#55CF7A; background:#55CF7A1f; border-color:#55CF7A55; }
+.step[data-state="ok"] .step-msg { color:#9FD9B1; }
+.step[data-state="fail"] { border-color:#E56B6F77; background:#E56B6F14; }
+.step[data-state="fail"] .step-ico { background:#E56B6F; }
+.step[data-state="fail"] .badge { color:#F07878; background:#E56B6F1f; border-color:#E56B6F55; }
+.step[data-state="fail"] .step-msg { color:#F2A0A0; }
+.step[data-state="skip"] { border-style:dashed; opacity:.55; }
+.step[data-state="skip"] .step-ico { background:#3A433C; color:#A0AAA2; }
+.step[data-state="skip"] .badge { color:#8FA396; border-color:#3A433C; }
+.step[data-state="skip"] .step-msg { color:#8FA396; }
+.verdict { display:flex; align-items:center; gap:16px; padding:16px 18px; border-radius:14px; border:1px solid; margin-bottom:12px; }
+.verdict.ok { background:#3FA95C18; border-color:#3FA95C77; }
+.verdict.fail { background:#E56B6F18; border-color:#E56B6F77; }
+.v-badge { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:800; font-size:15px; padding:8px 14px; border-radius:10px; color:#0B0D0C; }
+.verdict.ok .v-badge { background:#55CF7A; }
+.verdict.fail .v-badge { background:#E56B6F; }
+.v-title { font-size:17px; font-weight:750; color:#F1F5F2; }
+.v-sub { font-size:12.5px; color:#A0AAA2; margin-top:3px; }
+.code { background:#0D100E; border:1px solid #292F2B; border-radius:12px; padding:14px 16px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12.5px; line-height:1.7; color:#C9D3CB; white-space:pre; overflow-x:auto; margin-bottom:12px; }
+.code .kw { color:#B28DFF; }
+.code .fn { color:#6FA8DC; }
+.code .key { color:#F2B94B; }
+.code .str { color:#9FD9B1; }
+.code .num { color:#F28CB1; }
+.code .cm { color:#6B766E; }
+</style>
+"""
+
+UNKNOWN_ACCOUNT = Account("acc_999", "⚠ Unknown account (acc_999)", 0, "KZT")
+UNKNOWN_CATEGORY = Category("ghost", "⚠ Unknown category (ghost)", None, "expense")
+
+PRESETS = (
+    ("✅ Valid expense", "expense"),
+    ("💰 Valid income", "income"),
+    ("🚫 Unknown account", "account"),
+    ("❓ Unknown category", "category"),
+    ("± Wrong sign", "sign"),
+    ("💸 Over budget", "budget"),
+)
+
+
+def covering_budget(cats, budgets, cat_id):
+    """Maybe-бюджет, который покрывает категорию (сама она или её родитель)."""
+    found = next(
+        (
+            b
+            for b in budgets
+            if cat_id in {c.id for c in flatten_categories(cats, b.cat_id)}
+        ),
+        None,
+    )
+    return Some(found) if found else Nothing()
+
+
 def budget_view(b, cats, trans):
     """Транзакции бюджета за его период. Подкатегории сводятся к категории бюджета,
     потому что check_budget считает расходы по точному cat_id."""
@@ -626,65 +712,290 @@ def budget_step(cats, trans, budgets):
     def step(t):
         if t.amount >= 0:
             return Right(t)
-        covering = next(
-            (
-                b
-                for b in budgets
-                if t.cat_id in {c.id for c in flatten_categories(cats, b.cat_id)}
-            ),
-            None,
+        return (
+            covering_budget(cats, budgets, t.cat_id)
+            .map(
+                lambda b: check_budget(
+                    b, budget_view(b, cats, add_transaction(trans, t))
+                ).map(lambda _: t)
+            )
+            .get_or_else(Right(t))
         )
-        found = Some(covering) if covering else Nothing()
-        return found.map(
-            lambda b: check_budget(
-                b, budget_view(b, cats, add_transaction(trans, t))
-            ).map(lambda _: t)
-        ).get_or_else(Right(t))
 
     return step
 
 
-UNKNOWN_ACCOUNT = Account("acc_999", "⚠ Unknown account (acc_999)", 0, "KZT")
-UNKNOWN_CATEGORY = Category("ghost", "⚠ Unknown category (ghost)", None, "expense")
+def budget_note(t, cats, trans, budgets):
+    """Человекочитаемая строка про бюджет для успешного шага."""
+    if t.amount >= 0:
+        return "Income is not limited by budgets"
+    names = {c.id: c.name for c in cats}
+
+    def describe(b):
+        spent = sum(-x.amount for x in budget_view(b, cats, add_transaction(trans, t)))
+        return f"{names.get(b.cat_id, b.cat_id)}: {money(spent)} of {money(b.limit)}"
+
+    return (
+        covering_budget(cats, budgets, t.cat_id)
+        .map(describe)
+        .get_or_else("No budget covers this category")
+    )
+
+
+def apply_preset(name):
+    """Заполняет форму готовым сценарием (вызывается как on_click до перерисовки)."""
+    accounts, cats, _, _ = get_data()
+    expense, income = demo_category(cats, "expense"), demo_category(cats, "income")
+    values = {
+        "expense": (accounts[0], expense, -1000),
+        "income": (accounts[0], income, 200000),
+        "account": (UNKNOWN_ACCOUNT, expense, -1000),
+        "category": (accounts[0], UNKNOWN_CATEGORY, -1000),
+        "sign": (accounts[0], expense, 5000),
+        "budget": (accounts[0], expense, -900000),
+    }[name]
+    st.session_state.val_account = values[0]
+    st.session_state.val_category = values[1]
+    st.session_state.val_amount = values[2]
+
+
+def demo_category(cats, kind):
+    """Подкатегория нужного типа (если есть), иначе любая первая."""
+    of_kind = tuple(c for c in cats if c.type == kind)
+    return next((c for c in of_kind if c.parent_id), of_kind[0] if of_kind else cats[0])
 
 
 def error_text(error):
     text = error["error"]
     if "spent" in error:
-        text += f" {money(error['spent'])} of {money(error['limit'])}"
+        text += f" ({money(error['spent'])} of {money(error['limit'])})"
     return text
+
+
+def depth_of(by_id, cat_id):
+    """Глубина категории в дереве (корень = 0), рекурсивно."""
+    cat = by_id.get(cat_id)
+    return (
+        0
+        if cat is None or cat.parent_id is None
+        else 1 + depth_of(by_id, cat.parent_id)
+    )
+
+
+def section_head(eyebrow, title, text):
+    return (
+        '<div class="sec-head">'
+        f'<div class="sec-eyebrow">{escape(eyebrow)}</div>'
+        f'<div class="sec-title">{escape(title)}</div>'
+        f'<div class="sec-sub">{escape(text)}</div>'
+        "</div>"
+    )
+
+
+def card_head(num, title, sub):
+    return (
+        '<div class="card-head">'
+        f'<div class="card-num">{escape(num)}</div>'
+        f'<div><div class="card-title">{escape(title)}</div>'
+        f'<div class="card-sub">{escape(sub)}</div></div>'
+        "</div>"
+    )
+
+
+def breakdown_row(name, depth, own, top, color):
+    width = own / top * 100 if top else 0
+    pad = depth * 20
+    prefix = "└ " if depth else ""
+    return (
+        '<div class="bd-row">'
+        f'<div class="bd-name" style="padding-left:{pad}px">'
+        f'<span class="dot" style="background:{color}"></span>'
+        f'<span><span class="bd-sub">{prefix}</span>{escape(name)}</span></div>'
+        f'<div class="bd-amount">{money(own)}</div>'
+        f'<div class="bd-track"><div class="bd-fill" style="width:{width:.0f}%;'
+        f'background:{color}"></div></div>'
+        "</div>"
+    )
+
+
+def step_html(index, name, fn, state, message):
+    icon = {"ok": "✓", "fail": "✕", "skip": "–"}[state]
+    badge = {"ok": "Right(t)", "fail": "Left(error)", "skip": "skipped"}[state]
+    return (
+        f'<div class="step" data-state="{state}">'
+        f'<div class="step-ico">{icon}</div>'
+        '<div class="step-body">'
+        '<div class="step-top">'
+        f'<div class="step-name">{index}. {escape(name)}</div>'
+        f'<span class="badge">{badge}</span></div>'
+        f'<div class="step-fn">{escape(fn)}</div>'
+        f'<div class="step-msg">{escape(message)}</div>'
+        "</div></div>"
+    )
+
+
+def error_code(error):
+    rows = []
+    for key, value in error.items():
+        shown = (
+            f'<span class="num">{value}</span>'
+            if isinstance(value, int)
+            else f'<span class="str">"{escape(str(value))}"</span>'
+        )
+        rows.append(f'  <span class="key">"{escape(key)}"</span>: {shown},')
+    return '<span class="kw">Left</span>({\n' + "\n".join(rows) + "\n})"
+
+
+def verdict_html(result, account, category, amount):
+    if isinstance(result, Left):
+        return (
+            '<div class="verdict fail"><div class="v-badge">Left</div><div>'
+            '<div class="v-title">Transaction rejected</div>'
+            '<div class="v-sub">The first failing step stopped the chain</div>'
+            f'</div></div><div class="code">{error_code(result.error)}</div>'
+        )
+    sign = "+" if amount > 0 else "−"
+    return (
+        '<div class="verdict ok"><div class="v-badge">Right</div><div>'
+        '<div class="v-title">Transaction is valid</div>'
+        f'<div class="v-sub">{escape(account.name)} · {escape(category.name)} · '
+        f"{sign}{money(abs(amount))}</div></div></div>"
+    )
+
+
+BIND_CODE = (
+    '<div class="code"><span class="cm"># how the steps are chained</span>\n'
+    '<span class="fn">check_account</span>(t, accounts)\n'
+    '  .<span class="kw">bind</span>(<span class="fn">check_category</span>)'
+    '  <span class="cm"># safe_category → Some / Nothing</span>\n'
+    '  .<span class="kw">bind</span>(<span class="fn">check_budget</span>)'
+    '    <span class="cm"># first Left skips everything after it</span></div>'
+)
+
+
+def render_category_explorer(cats, trans):
+    all_roots = [c for c in cats if c.parent_id is None]
+    roots = [c for c in all_roots if c.type == "expense"]
+
+    st.markdown(
+        section_head(
+            "Recursion · lab 2",
+            "Category explorer",
+            "Expenses summed recursively over the category tree.",
+        ),
+        unsafe_allow_html=True,
+    )
+    if not roots:
+        st.info("No expense categories found.")
+        return
+
+    names = {c.id: c.name for c in cats}
+    by_id = {c.id: c for c in cats}
+
+    with st.container(border=True):
+        root = st.selectbox(
+            "Expense category",
+            [c.id for c in roots],
+            format_func=lambda x: names[x],
+            key="core_root",
+        )
+        color = PALETTE[[c.id for c in all_roots].index(root) % len(PALETTE)]
+        branch = flatten_categories(cats, root)
+        own = {
+            c.id: sum(-t.amount for t in trans if t.cat_id == c.id and t.amount < 0)
+            for c in branch
+        }
+        total = sum_expenses_recursive(cats, trans, root)
+        everything = -sum(t.amount for t in trans if t.amount < 0)
+        share = total / everything if everything else 0
+        biggest = max(branch, key=lambda c: own[c.id])
+
+        cards = (
+            kpi("Branch total", money(total), "recursive sum over the tree"),
+            kpi("Share of all expenses", f"{share:.0%}", f"of {money(everything)}"),
+            kpi("Categories in branch", str(len(branch)), "including the root"),
+            kpi("Largest category", names[biggest.id], money(own[biggest.id])),
+        )
+        st.markdown(
+            '<div class="kpi-grid">' + "".join(cards) + "</div>",
+            unsafe_allow_html=True,
+        )
+        top = max(own.values(), default=0)
+        base = depth_of(by_id, root)
+        st.caption("Own expenses per category · bar length is relative to the largest")
+        rows = (
+            breakdown_row(c.name, depth_of(by_id, c.id) - base, own[c.id], top, color)
+            for c in branch
+        )
+        st.markdown("".join(rows), unsafe_allow_html=True)
 
 
 def render_validation_pipeline():
     accounts, cats, trans, budgets = get_data()
 
-    st.divider()
-    st.subheader("Transaction validation pipeline")
-    st.caption(
-        "Every step returns Right(transaction) or Left(error). "
-        "bind runs the next step only after a Right, so the first error stops the chain."
+    st.write("")
+    st.markdown(
+        section_head(
+            "Maybe / Either · lab 4",
+            "Transaction validation pipeline",
+            "Every step returns Right(transaction) or Left(error); "
+            "bind stops the chain at the first Left.",
+        ),
+        unsafe_allow_html=True,
     )
+    if not accounts:
+        st.info("No accounts available.")
+        return
 
-    c1, c2, c3, c4 = st.columns(4)
-    account = c1.selectbox(
-        "Account",
-        accounts + (UNKNOWN_ACCOUNT,),
-        format_func=lambda a: a.name,
-        key="val_account",
-    )
-    category = c2.selectbox(
-        "Category",
-        cats + (UNKNOWN_CATEGORY,),
-        format_func=lambda c: c.name,
-        key="val_category",
-    )
-    amount = c3.number_input(
-        "Amount (minus = expense)", value=-1000, step=500, key="val_amount"
-    )
-    latest = max(
-        (t.ts for t in trans), default=datetime.now().astimezone().date().isoformat()
-    )
-    day = c4.date_input("Date", value=date.fromisoformat(latest), key="val_date")
+    st.session_state.setdefault("val_account", accounts[0])
+    st.session_state.setdefault("val_category", demo_category(cats, "expense"))
+    st.session_state.setdefault("val_amount", -1000)
+
+    st.markdown('<div class="sc-label">Quick scenarios</div>', unsafe_allow_html=True)
+    for col, (label, key) in zip(st.columns(len(PRESETS)), PRESETS, strict=True):
+        col.button(
+            label,
+            key=f"preset_{key}",
+            on_click=apply_preset,
+            args=(key,),
+            use_container_width=True,
+        )
+
+    left, right = st.columns([1, 1.3], gap="large")
+
+    with left, st.container(border=True):
+        st.markdown(
+            card_head("1", "Transaction", "Fill in the fields or pick a scenario"),
+            unsafe_allow_html=True,
+        )
+        account = st.selectbox(
+            "Account",
+            accounts + (UNKNOWN_ACCOUNT,),
+            format_func=lambda a: a.name,
+            key="val_account",
+        )
+        category = st.selectbox(
+            "Category",
+            cats + (UNKNOWN_CATEGORY,),
+            format_func=lambda c: c.name,
+            key="val_category",
+        )
+        if category.id == UNKNOWN_CATEGORY.id:
+            hint = chip("unknown", RED) + "This category does not exist"
+        elif category.type == "expense":
+            hint = chip("expense", RED) + "Use a negative amount, e.g. −1000"
+        else:
+            hint = chip("income", GREEN) + "Use a positive amount, e.g. +200000"
+        st.markdown(f'<div class="hint">{hint}</div>', unsafe_allow_html=True)
+
+        amount = st.number_input(
+            "Amount (− expense, + income)", step=500, key="val_amount"
+        )
+        latest = max(
+            (t.ts for t in trans),
+            default=datetime.now().astimezone().date().isoformat(),
+        )
+        day = st.date_input("Date", value=date.fromisoformat(latest), key="val_date")
 
     t = Transaction(
         id=f"tx_{uuid4().hex[:8]}",
@@ -695,70 +1006,71 @@ def render_validation_pipeline():
         note="",
     )
 
-    steps = (
-        ("Account exists", lambda x: check_account(x, accounts)),
+    pipeline = (
         (
-            "Category exists and matches the amount sign",
+            "Account exists",
+            "check_account(t, accounts)",
+            lambda x: check_account(x, accounts),
+        ),
+        (
+            "Category exists and matches the sign",
+            "check_category(t, cats) · safe_category → Some / Nothing",
             lambda x: check_category(x, cats),
         ),
-        ("Budget is not exceeded", budget_step(cats, trans, budgets)),
+        (
+            "Budget is not exceeded",
+            "check_budget(b, trans) · budget lookup → Some / Nothing",
+            budget_step(cats, trans, budgets),
+        ),
+    )
+    ok_text = (
+        f"{account.name} found",
+        f"{category.name} is an {category.type} category and the sign matches",
+        budget_note(t, cats, trans, budgets),
     )
 
     result = Right(t)
-    for name, step in steps:
+    cards = []
+    for i, (name, fn, step) in enumerate(pipeline, start=1):
         if isinstance(result, Left):
-            st.markdown(f"⏭ {name} — skipped")
+            cards.append(
+                step_html(i, name, fn, "skip", "Not run: an earlier step returned Left")
+            )
             continue
         result = result.bind(step)
         if isinstance(result, Left):
-            st.markdown(f"❌ **{name}** — {error_text(result.error)}")
+            cards.append(step_html(i, name, fn, "fail", error_text(result.error)))
         else:
-            st.markdown(f"✅ {name}")
+            cards.append(step_html(i, name, fn, "ok", ok_text[i - 1]))
 
-    if isinstance(result, Left):
-        st.error("Left: transaction rejected")
-        st.json(result.error)
-        return
+    with right, st.container(border=True):
+        st.markdown(
+            card_head("2", "Pipeline", "Checks run top to bottom"),
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div class="steps">' + "".join(cards) + "</div>", unsafe_allow_html=True
+        )
+        st.markdown(
+            verdict_html(result, account, category, t.amount), unsafe_allow_html=True
+        )
+        if isinstance(result, Right) and st.button(
+            "Add to data", type="primary", key="val_add"
+        ):
+            st.session_state.data = (accounts, cats, add_transaction(trans, t), budgets)
+            st.rerun()
 
-    st.success("Right: transaction is valid")
-    if st.button("Add to data", type="primary", key="val_add"):
-        st.session_state.data = (accounts, cats, add_transaction(trans, t), budgets)
-        st.rerun()
+    st.markdown(BIND_CODE, unsafe_allow_html=True)
 
 
 def page_core():
-    st.title("Functional Core")
+    st.markdown(REPORTS_CSS + CORE_CSS, unsafe_allow_html=True)
     _, cats, trans, _ = get_data()
 
-    roots = [c for c in cats if c.parent_id is None and c.type == "expense"]
+    st.title("Functional Core")
+    st.caption("Pure functions, recursion and Maybe / Either containers in action.")
 
-    if not roots:
-        st.info("No expense categories found.")
-        return
-
-    names = {c.id: c.name for c in cats}
-
-    root_id = st.selectbox(
-        "Category",
-        [c.id for c in roots],
-        format_func=lambda x: names[x],
-    )
-
-    total = sum_expenses_recursive(cats, trans, root_id)
-    st.metric("Total expenses", money(total))
-
-    rows = [
-        {
-            "Category": c.name,
-            "Expenses": money(
-                sum(-t.amount for t in trans if t.cat_id == c.id and t.amount < 0)
-            ),
-        }
-        for c in flatten_categories(cats, root_id)
-    ]
-
-    st.dataframe(rows, hide_index=True, use_container_width=True)
-
+    render_category_explorer(cats, trans)
     render_validation_pipeline()
 
 
