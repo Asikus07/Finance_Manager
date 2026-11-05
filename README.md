@@ -97,6 +97,5 @@ Finance_Manager/
 ## Вклад участников
 
 | Участник | Что сделал |
-|---|---|
-| [имя друга] | `app/core/*`, тесты, `seed.json` |
-| [ваше имя] | UI в `app/main.py`: Overview, Data, Reports, тема, интеграция с `core` |
+| [Малик] | `app/core/*`, тесты, `seed.json` |
+| [Аскар] | UI в `app/main.py`: Overview, Data, Reports, тема, интеграция с `core` |
