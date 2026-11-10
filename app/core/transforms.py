@@ -1,6 +1,6 @@
 import json
 from collections.abc import Callable
-from dataclasses import replace
+from dataclasses import asdict, replace
 from functools import reduce
 
 from core.domain import Account, Budget, Category, Transaction
@@ -39,6 +39,22 @@ def load_seed(path: str) -> tuple[tuple, tuple, tuple, tuple]:
         tuple(Transaction(**t) for t in data["transactions"]),
         tuple(Budget(**b) for b in data["budgets"]),
     )
+
+
+def to_dict(x: object) -> dict:
+    return x._asdict() if hasattr(x, "_asdict") else asdict(x)
+
+
+def save_seed(path: str, data: tuple[tuple, tuple, tuple, tuple]) -> None:
+    accounts, cats, trans, budgets = data
+    content = {
+        "accounts": [to_dict(a) for a in accounts],
+        "categories": [to_dict(c) for c in cats],
+        "transactions": [to_dict(t) for t in trans],
+        "budgets": [to_dict(b) for b in budgets],
+    }
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(content, file, ensure_ascii=False, indent=2)
 
 
 def by_category(cat_id: str) -> Callable[[Transaction], bool]:

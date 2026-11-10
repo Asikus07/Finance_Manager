@@ -1,9 +1,15 @@
 import re
 from pathlib import Path
 
+import pytest
 from streamlit.testing.v1 import AppTest
 
 MAIN = str(Path(__file__).parent.parent / "app" / "main.py")
+
+
+@pytest.fixture(autouse=True)
+def temp_state(tmp_path, monkeypatch):
+    monkeypatch.setenv("FIN_STATE", str(tmp_path / "state.json"))
 
 
 def open_page(page, setup=None):

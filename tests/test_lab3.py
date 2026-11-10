@@ -1,67 +1,73 @@
-from core.domain import Transaction
-from core.memo import (
-    forecast_expenses,
-    forecast_raw,
-    last_months,
-    measure_ms,
-    month_of,
-    sum_by_months,
-)
-
-TRANS = (
-    Transaction("t1", "acc_001", "taxi", -1000, "2026-09-05", ""),
-    Transaction("t2", "acc_001", "taxi", -3000, "2026-09-20", ""),
-    Transaction("t3", "acc_001", "taxi", -2000, "2026-10-03", ""),
-    Transaction("t4", "acc_001", "bus", -500, "2026-10-10", ""),
-    Transaction("t5", "acc_001", "taxi", 700, "2026-10-11", "refund"),
+from core.domain import Account, Budget, Category, Transaction
+from core.transforms import (
+    account_balance,
+    add_transaction,
+    load_seed,
+    save_seed,
+    update_budget,
 )
 
 
-def test_month_of_cuts_day():
-    assert month_of(TRANS[0]) == "2026-09"
+def test_add_transaction_returns_new_tuple():
+    t = Transaction("t1", "acc_001", "taxi", -300, "2026-10-01", "")
+    old = ()
+    new = add_transaction(old, t)
+    assert old == ()
+    assert new == (t,)
 
 
-def test_last_months_return_lastest():
-    assert last_months(TRANS, 1) == ("2026-10",)
+def test_add_transaction_keeps_order():
+    t1 = Transaction("t1", "acc_001", "taxi", -300, "2026-10-01", "")
+    t2 = Transaction("t2", "acc_001", "bus", -100, "2026-10-02", "")
+    result = add_transaction((t1,), t2)
+    assert result == (t1, t2)
 
 
-def test_last_months_more_than_available():
-    assert last_months(TRANS, 5) == ("2026-09", "2026-10")
+def test_update_budget_changes_only_target():
+    b1 = Budget("b1", "food", 100, "month")
+    b2 = Budget("b2", "car", 50, "month")
+    result = update_budget((b1, b2), "b1", 999)
+    new_b1, new_b2 = result
+    assert new_b1.limit == 999
+    assert new_b2 == b2
+    assert b1.limit == 100
 
 
-def test_last_months_zero_is_empty():
-    assert last_months(TRANS, 0) == ()
+def test_account_balance_sums_only_own_account():
+    trans = (
+        Transaction("t1", "acc_001", "salary", 1000, "2026-10-01", ""),
+        Transaction("t2", "acc_001", "taxi", -300, "2026-10-02", ""),
+        Transaction("t3", "acc_002", "taxi", -50, "2026-10-02", ""),
+    )
+    assert account_balance(trans, "acc_001") == 700
+    assert account_balance(trans, "acc_002") == -50
 
 
-def test_forecast_raw_average_two_months():
-    assert forecast_raw("taxi", TRANS, 2) == 3000
+def test_account_balance_is_zero_without_transactions():
+    assert account_balance((), "acc_001") == 0
 
 
-def test_forecast_raw_ignores_other_category_and_incomes():
-    assert forecast_raw("taxi", TRANS, 1) == 2000
+def test_load_seed_returns_tuples_of_models():
+    accounts, categories, trans, budgets = load_seed("data/seed.json")
+    assert len(accounts) >= 3
+    assert len(categories) >= 10
+    assert len(budgets) >= 3
+    assert isinstance(accounts[0], Account)
+    assert isinstance(categories[0], Category)
+    assert isinstance(trans[0], Transaction)
+    assert isinstance(budgets[0], Budget)
 
 
-def test_forecast_raw_empty_is_zero():
-    assert forecast_raw("taxi", (), 3) == 0
+def test_save_seed_round_trip(tmp_path):
+    data = load_seed("data/seed.json")
+    path = str(tmp_path / "state.json")
+    save_seed(path, data)
+    assert load_seed(path) == data
 
 
-def test_forecast_expenses_uses_cache():
-    forecast_expenses.cache_clear()
-    first = forecast_expenses("taxi", TRANS, 2)
-    second = forecast_expenses("taxi", TRANS, 2)
-    third = forecast_expenses("taxi", TRANS, 2)
-    info = forecast_expenses.cache_info()
-    assert first == second == third == 3000
-    assert info.hits == 2
-    assert info.misses == 1
-
-
-def test_measure_ms_returns_result_and_time():
-    result, ms = measure_ms(forecast_raw, "taxi", TRANS, 2)
-    assert result == 3000
-    assert ms >= 0
-
-
-def test_sum_by_months_recursive():
-    assert sum_by_months("taxi", TRANS, ("2026-09", "2026-10")) == 6000
-    assert sum_by_months("taxi", TRANS, ()) == 0
+def test_save_seed_keeps_new_transaction(tmp_path):
+    accounts, cats, trans, budgets = load_seed("data/seed.json")
+    t = Transaction("tx_new", "acc_001", "taxi", -700, "2026-10-08", "test")
+    path = str(tmp_path / "state.json")
+    save_seed(path, (accounts, cats, add_transaction(trans, t), budgets))
+    assert load_seed(path)[2][-1] == t
