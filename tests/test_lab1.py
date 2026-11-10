@@ -1,5 +1,11 @@
 from core.domain import Account, Budget, Category, Transaction
-from core.transforms import account_balance, add_transaction, load_seed, update_budget
+from core.transforms import (
+    account_balance,
+    add_transaction,
+    load_seed,
+    save_seed,
+    update_budget,
+)
 
 
 def test_add_transaction_returns_new_tuple():
@@ -50,3 +56,18 @@ def test_load_seed_returns_tuples_of_models():
     assert isinstance(categories[0], Category)
     assert isinstance(trans[0], Transaction)
     assert isinstance(budgets[0], Budget)
+
+
+def test_save_seed_round_trip(tmp_path):
+    data = load_seed("data/seed.json")
+    path = str(tmp_path / "state.json")
+    save_seed(path, data)
+    assert load_seed(path) == data
+
+
+def test_save_seed_keeps_new_transaction(tmp_path):
+    accounts, cats, trans, budgets = load_seed("data/seed.json")
+    t = Transaction("tx_new", "acc_001", "taxi", -700, "2026-10-08", "test")
+    path = str(tmp_path / "state.json")
+    save_seed(path, (accounts, cats, add_transaction(trans, t), budgets))
+    assert load_seed(path)[2][-1] == t
