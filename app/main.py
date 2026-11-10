@@ -2,6 +2,7 @@ from datetime import date, datetime
 from html import escape
 from pathlib import Path
 from uuid import uuid4
+from itertools import islice
 
 import altair as alt
 import pandas as pd
@@ -198,6 +199,8 @@ def set_page(page):
     st.session_state["current_page"] = page
 
 
+
+
 def render_header():
     left, right = st.columns([1.3, 5])
 
@@ -236,12 +239,118 @@ def render_header():
     st.divider()
 
 
+def _call(name, fallback_fn, *args):
+    """Вызывает core.lazy.<name>; если её нет или она упала, берёт fallback_fn."""
+    try:
+        from core import lazy
+ 
+        fn = getattr(lazy, name)
+    except (ImportError, AttributeError):
+        return fallback_fn(*args), f"lazy.{name}: ещё не написана"
+    try:
+        return fn(*args), None
+    except Exception as e:  # noqa: BLE001
+        return fallback_fn(*args), f"lazy.{name}: упала с {e!r}"
+ 
+ 
+def _counted(stream, counter):
+    """Прозрачная обёртка: считает, сколько элементов реально вытянули из потока."""
+    for item in stream:
+        counter["n"] += 1
+        yield item
+ 
+ 
+def _fallback_iter(trans, pred):
+    return (t for t in trans if pred(t))
+ 
+ 
+def _fallback_top(trans, cats, k):
+    totals = {}
+    for t in trans:
+        totals[t.cat_id] = totals.get(t.cat_id, 0) - t.amount
+    return iter(sorted(totals.items(), key=lambda kv: -kv[1])[:k])
+ 
+ 
+def _build_stream(trans, threshold, counter, problems):
+    pred = lambda t: t.amount <= -threshold  # noqa: E731
+    stream, err = _call("iter_transactions", _fallback_iter, trans, pred)
+    if err:
+        problems.append(err)
+    return _counted(iter(stream), counter)
+ 
+ 
+def _status(problems):
+    with st.expander("Статус логики (core/lazy.py)", expanded=bool(problems)):
+        if problems:
+            for p in dict.fromkeys(problems):
+                st.error(p)
+        else:
+            st.success("Все ленивые функции отработали без ошибок")
+ 
+ 
+def lazy_section():
+    """Секция для страницы Pipelines: поток больших транзакций."""
+    st.divider()
+    st.subheader("Ленивый поток больших транзакций")
+    _, cats, trans, _ = get_data()
+    names = {c.id: c.name for c in cats}
+    problems = []
+ 
+    threshold = st.slider("Большая транзакция: расход от", 1000, 20000, 10000, 500)
+    n = st.slider("Взять первые N из потока", 1, 20, 5)
+ 
+    counter = {"n": 0}
+    stream = _build_stream(trans, threshold, counter, problems)
+    st.caption(f"Поток создан, прочитано из него: {counter['n']} (ничего не считали)")
+ 
+    first = tuple(islice(stream, n))  # материализация только здесь
+    st.metric("Вытянуто из потока", counter["n"], help="Остальное не обрабатывалось")
+    st.dataframe(
+        [
+            {"Дата": t.ts, "Категория": names.get(t.cat_id, t.cat_id), "Сумма": t.amount}
+            for t in first
+        ],
+        hide_index=True,
+    )
+    st.caption(f"Всего транзакций в данных: {len(trans)}")
+    _status(problems)
+ 
+ 
+def top_categories_view():
+    with st.container(border=True):
+        st.subheader("Top categories (lazy)")
+        """Содержимое страницы Reports: топ категорий без полной материализации."""
+        st.subheader("Топ категорий (lazy)")
+        _, cats, trans, _ = get_data()
+        names = {c.id: c.name for c in cats}
+        problems = []
+ 
+        c1, c2 = st.columns(2)
+        k = c1.slider("Сколько категорий (k)", 1, 10, 3)
+        threshold = c2.slider("Учитывать расходы от", 1, 20000, 1000, 500)
+ 
+        counter = {"n": 0}
+        stream = _build_stream(trans, threshold, counter, problems)
+        top_iter, err = _call("lazy_top_categories", _fallback_top, stream, cats, k)
+        if err:
+            problems.append(err)
+ 
+        top = tuple(top_iter)  # единственная материализация: финальный шаг
+        m1, m2 = st.columns(2)
+        m1.metric("Транзакций прошло через поток", counter["n"])
+        m2.metric("Всего в данных", len(trans))
+ 
+        rows = [{"Категория": names.get(cid, cid), "Расходы": total} for cid, total in top]
+        st.dataframe(rows, hide_index=True)
+        if rows:
+            st.bar_chart({r["Категория"]: r["Расходы"] for r in rows})
+        _status(problems)
+
+
 def page_overview():
     accounts, cats, trans, budgets = get_data()
     names = {c.id: c.name for c in cats}
 
-    # account_balance (через reduce) считает движения по счёту,
-    # поэтому общий баланс = начальный остаток + движения по каждому счёту
     total_balance = sum(a.balance + account_balance(trans, a.id) for a in accounts)
 
     income = sum(t.amount for t in trans if t.amount > 0)
@@ -257,7 +366,6 @@ def page_overview():
     c3.metric("Transactions", f"{len(trans):,}")
     c4.metric("Total balance", money(total_balance))
 
-    # --- ряд 2: доходы и расходы ---
     c5, c6 = st.columns(2)
     c5.metric("Total income", money(income))
     c6.metric("Total expenses", money(expenses))
@@ -1063,6 +1171,9 @@ def page_pipelines():
 
     df = transaction_frame(result, names)
     st.dataframe(df, hide_index=True, use_container_width=True)
+    lazy_section()
+
+
 
 
 def page_async():
@@ -1105,8 +1216,6 @@ REPORTS_CSS = """
 </style>
 """
 
-
-# ---------- ЧИСТЫЕ ПОМОЩНИКИ ----------
 def month_label(m):
     """'2026-09' -> 'Sep 2026'"""
     return datetime.strptime(m, "%Y-%m").strftime("%b %Y")
@@ -1428,6 +1537,7 @@ def page_reports():
                         )
                     else:
                         st.markdown(f"✅ {name}")
+    top_categories_view()
 
 
 PAGES = {
