@@ -9,6 +9,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 from core.domain import Account, Category, Transaction
+from core.frp import BUDGET_ALERT, TRANSACTION_ADDED, initial_state, make_bus
 from core.ftypes import Left, Nothing, Right, Some
 from core.memo import forecast_expenses, forecast_raw, last_months, measure_ms
 from core.recursion import flatten_categories, sum_expenses_recursive
@@ -1185,10 +1186,97 @@ def page_pipelines():
     lazy_section()
 
 
-def page_async():
-    st.title("Async / FRP")
-    st.info("Event processing will be connected here.")
+def get_bus():
+    if "bus" not in st.session_state:
+        st.session_state.bus = make_bus(initial_state(*get_data()))
+    return st.session_state.bus
 
+
+def page_async():
+    accounts, cats, _, _ = get_data()
+    bus = get_bus()
+    names = {c.id: c.name for c in cats}
+    acc_names = {a.id: a.name for a in accounts}
+
+    st.title("Async / FRP")
+    st.caption(
+        "Event bus: TRANSACTION_ADDED → pure subscribers update balances, "
+        "check budgets and create BUDGET_ALERT / BALANCE_ALERT notifications."
+    )
+
+    with st.container(border=True):
+        st.subheader("Generate event")
+        c1, c2, c3 = st.columns(3)
+        account = c1.selectbox(
+            "Account", accounts, format_func=lambda a: a.name, key="frp_acc"
+        )
+        category = c2.selectbox(
+            "Category", cats, format_func=lambda c: c.name, key="frp_cat"
+        )
+        amount = c3.number_input("Amount", min_value=1, step=1000, value=5000)
+
+        b1, b2, b3, b4 = st.columns(4)
+        if b1.button("Publish TRANSACTION_ADDED", type="primary"):
+            signed = -amount if category.type == "expense" else amount
+            bus.publish(
+                TRANSACTION_ADDED,
+                {"account_id": account.id, "cat_id": category.id, "amount": signed},
+            )
+        if b2.button("Demo: big food expense"):
+            bus.publish(
+                TRANSACTION_ADDED,
+                {"account_id": account.id, "cat_id": "restaurants", "amount": -200000},
+            )
+        if b3.button("Demo: drain account"):
+            balance = bus.state["balances"].get(account.id, 0)
+            bus.publish(
+                TRANSACTION_ADDED,
+                {"account_id": account.id, "cat_id": "leisure", "amount": -balance},
+            )
+        if b4.button("Reset bus"):
+            st.session_state.pop("bus")
+            st.rerun()
+
+    state = bus.state
+
+    st.subheader("Live balances")
+    cols = st.columns(len(state["balances"]) or 1)
+    for col, (acc_id, value) in zip(cols, state["balances"].items()):
+        low = value < state["low_balance"]
+        col.metric(
+            acc_names.get(acc_id, acc_id),
+            money(value),
+            "low balance" if low else None,
+            delta_color="inverse" if low else "normal",
+        )
+
+    st.subheader("Budgets (current month)")
+    for cat_id, limit in state["limits"].items():
+        spent = state["spent"].get(cat_id, 0)
+        ratio = spent / limit if limit else 0
+        st.write(f"{names.get(cat_id, cat_id)}: {money(spent)} of {money(limit)}")
+        st.progress(min(ratio, 1.0))
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("Notifications")
+        if not state["notifications"]:
+            st.info("No alerts yet.")
+        for note in reversed(state["notifications"]):
+            show = st.error if note["type"] == BUDGET_ALERT else st.warning
+            show(f"{note['ts']} · {note['text']}")
+    with right:
+        st.subheader("Event log")
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {"Time": e.ts, "Event": e.name, "Payload": str(e.payload)}
+                    for e in reversed(bus.log)
+                ]
+            ),
+            hide_index=True,
+            width="stretch",
+        )
 
 def page_tests():
     st.title("Tests")

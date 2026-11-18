@@ -931,6 +931,30 @@
       "amount": -2500,
       "ts": "2026-11-11",
       "note": "to home"
+    },
+    {
+      "id": "tx_c2803226",
+      "account_id": "acc_001",
+      "cat_id": "restaurants",
+      "amount": -1000,
+      "ts": "2026-11-11",
+      "note": ""
+    },
+    {
+      "id": "tx_bf67e37e",
+      "account_id": "acc_001",
+      "cat_id": "food",
+      "amount": -160000,
+      "ts": "2026-11-18",
+      "note": ""
+    },
+    {
+      "id": "tx_5f6afe56",
+      "account_id": "acc_001",
+      "cat_id": "salary",
+      "amount": 1000000,
+      "ts": "2026-11-18",
+      "note": ""
     }
   ],
   "budgets": [

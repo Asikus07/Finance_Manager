@@ -35,9 +35,7 @@ class Budget:
     period: str
 
 
-@dataclass(frozen=True)
-class Event:
-    id: str
-    ts: str
+class Event(NamedTuple):
     name: str
+    ts: str
     payload: dict
