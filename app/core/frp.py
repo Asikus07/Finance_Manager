@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import reduce
 
 from core.domain import Account, Budget, Category, Event, Transaction
@@ -14,7 +14,7 @@ Handler = Callable[[Event, dict], dict]
 
 
 def now_ts() -> str:
-    return datetime.now().isoformat(timespec="seconds")
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 class EventBus:

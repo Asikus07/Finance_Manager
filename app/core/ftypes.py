@@ -45,7 +45,7 @@ class Right:
     def get_or_else(self, default: Any) -> Any:
         return self.value
 
- 
+
 @dataclass(frozen=True)
 class Left:
     error: dict

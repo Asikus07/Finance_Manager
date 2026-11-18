@@ -1278,6 +1278,7 @@ def page_async():
             width="stretch",
         )
 
+
 def page_tests():
     st.title("Tests")
     st.info("Test results and project checks will be connected here.")
