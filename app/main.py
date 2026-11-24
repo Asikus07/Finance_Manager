@@ -13,6 +13,14 @@ from core.frp import BUDGET_ALERT, TRANSACTION_ADDED, initial_state, make_bus
 from core.ftypes import Left, Nothing, Right, Some
 from core.memo import forecast_expenses, forecast_raw, last_months, measure_ms
 from core.recursion import flatten_categories, sum_expenses_recursive
+from core.report import (
+    average_spent,
+    count_expenses,
+    spent_by_category,
+    total_spent,
+    tree_budget_check,
+)
+from core.service import BudgetService, ReportService
 from core.transforms import (
     account_balance,
     add_transaction,
@@ -1637,6 +1645,83 @@ def page_reports():
                     else:
                         st.markdown(f"✅ {name}")
     top_categories_view()
+    services_report_view()
+
+def show_steps(steps):
+    for i, (name, value) in enumerate(steps):
+        size = f"{len(value)} transactions" if isinstance(value, tuple) else value
+        st.markdown(f"**{i}.** `{name}` → {size}")
+
+
+def show_spending_table(by_cat, cats):
+    names = {c.id: c.name for c in cats}
+    rows = [
+        {"Category": names.get(cat_id, cat_id), "Spent": money(spent)}
+        for cat_id, spent in sorted(by_cat.items(), key=lambda kv: -kv[1])
+    ]
+    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+
+
+def monthly_report_view(cats, trans, budgets):
+    months = sorted({t.ts[:7] for t in trans}, reverse=True)
+    if not months:
+        st.info("No transactions yet.")
+        return
+    
+    month = st.selectbox("Month", months, key="lab7_month")
+
+    service = BudgetService(
+        validators=(tree_budget_check(cats),),
+        calculators=(total_spent, spent_by_category), 
+        trans=trans,
+        budgets=budgets,
+    )
+    report = service.monthly_report(month)
+    st.markdown("**Pipeline steps**")
+    show_steps(report["steps"])
+    st.metric("Spent this month", money(report["total_spent"]))
+
+    show_spending_table(report["spent_by_category"], cats)
+
+    for e in report["over_budget"]:
+        st.error(f"{e['error']} Spent {money(e['spent'])} of {money(e['limit'])}.")
+    if not report["over_budget"]:
+        st.success("All budgets are within limits.")
+
+
+def category_report_view(cats, trans):
+    names = {c.id: c.name for c in cats}
+    options = [c.id for c in cats if c.type == "expense"]
+    cat_id = st.selectbox("Category", options, format_func=names.get, key="lab7_cat")
+
+    service = ReportService(
+        aggregators=(total_spent, spent_by_category, count_expenses, average_spent),
+        cats=cats,
+        trans=trans,
+    )
+    report = service.category_report(cat_id)
+
+    st.markdown("**Pipeline steps**")
+    show_steps(report["steps"])
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Total spent", money(report["total_spent"]))
+    c2.metric("Expenses", report["count_expenses"])
+    c3.metric("Average expense", money(report["average_spent"]))
+
+    show_spending_table(report["spent_by_category"], cats)
+
+
+def services_report_view():
+    _, cats, trans, budgets = get_data()
+
+    st.divider()
+    st.subheader("Budget / category report")
+    tab1, tab2 = st.tabs(["Monthly budget report", "Category report"])
+    with tab1:
+        monthly_report_view(cats, trans, budgets)
+    with tab2:
+        category_report_view(cats, trans)
 
 
 PAGES = {
