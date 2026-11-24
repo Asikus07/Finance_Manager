@@ -1,4 +1,7 @@
+import asyncio
 import os
+import subprocess
+import sys
 from datetime import date, datetime
 from html import escape
 from itertools import islice
@@ -9,9 +12,16 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 from core.domain import Account, Category, Transaction
+from core.final import final_report
 from core.frp import BUDGET_ALERT, TRANSACTION_ADDED, initial_state, make_bus
 from core.ftypes import Left, Nothing, Right, Some
 from core.memo import forecast_expenses, forecast_raw, last_months, measure_ms
+from core.parallel import (
+    account_forecast,
+    balance_forecast,
+    expenses_by_month,
+    month_total,
+)
 from core.recursion import flatten_categories, sum_expenses_recursive
 from core.report import (
     average_spent,
@@ -1286,15 +1296,152 @@ def page_async():
             width="stretch",
         )
 
+    async_section()
+
+
+def run_one_by_one(accounts, trans, months, delay):
+    for m in months:
+        asyncio.run(month_total(trans, m, delay))
+    for a in accounts:
+        asyncio.run(account_forecast(a, trans, delay))
+
+
+def run_together(accounts, trans, months, delay):
+    async def both():
+        return await asyncio.gather(
+            expenses_by_month(trans, months, delay),
+            balance_forecast(accounts, trans, delay),
+        )
+
+    return asyncio.run(both())
+
+
+def async_section():
+    accounts, _, trans, _ = get_data()
+    names = {a.id: a.name for a in accounts}
+    months = tuple(sorted({t.ts[:7] for t in trans}))
+
+    st.divider()
+    st.subheader("Async aggregations")
+    st.caption("expenses_by_month and balance_forecast run with asyncio.gather")
+
+    spent, forecast = run_together(accounts, trans, months, 0)
+
+    left, right = st.columns(2)
+    left.markdown("**Expenses by month**")
+    left.dataframe(
+        pd.DataFrame([{"Month": m, "Spent": money(v)} for m, v in spent.items()]),
+        hide_index=True,
+    )
+    right.markdown("**Balance forecast (next month)**")
+    right.dataframe(
+        pd.DataFrame(
+            [{"Account": names[i], "Forecast": money(v)} for i, v in forecast.items()]
+        ),
+        hide_index=True,
+    )
+
+    delay = st.slider("Simulated bank delay, s", 0.1, 1.0, 0.3, 0.1, key="async_delay")
+    if st.button("Measure: one by one vs gather", key="async_measure"):
+        _, slow = measure_ms(run_one_by_one, accounts, trans, months, delay)
+        _, fast = measure_ms(run_together, accounts, trans, months, delay)
+        tasks = len(months) + len(accounts)
+        c1, c2, c3 = st.columns(3)
+        c1.metric("One by one", f"{slow:.0f} ms", f"{tasks} tasks")
+        c2.metric("asyncio.gather", f"{fast:.0f} ms")
+        c3.metric("Speedup", f"x{slow / fast:.1f}")
+
+
+ROOT = Path(__file__).parent.parent
+
+LABS = (
+    ("1", "Pure functions, immutability, HOF", "Overview · Data", "test_lab1.py"),
+    ("2", "Closures and recursion", "Functional Core · Pipelines", "test_lab2.py"),
+    ("3", "Memoization (lru_cache)", "Reports → Forecast (cached)", "test_lab3.py"),
+    ("4", "Maybe / Either", "Functional Core · Reports", "test_lab4.py"),
+    ("5", "Lazy evaluation (yield)", "Pipelines · Reports", "test_lab5.py"),
+    ("6", "FRP / event bus", "Async/FRP", "test_lab6.py"),
+    ("7", "compose / pipe, services (DI)", "Reports → Budget report", "test_lab7.py"),
+    ("8", "asyncio.gather, final report", "Async/FRP · Reports", "test_lab8.py"),
+)
+
+
+def count_tests(file_name):
+    path = ROOT / "tests" / file_name
+    if not path.exists():
+        return 0
+    lines = path.read_text(encoding="utf-8").splitlines()
+    return sum(1 for line in lines if line.startswith("def test_"))
+
 
 def page_tests():
     st.title("Tests")
-    st.info("Test results and project checks will be connected here.")
+    st.caption("pytest: at least 5 tests for every lab")
+
+    rows = [
+        {
+            "Lab": num,
+            "Topic": topic,
+            "File": f"tests/{file}",
+            "Tests": count_tests(file),
+        }
+        for num, topic, _, file in LABS
+    ]
+    total = sum(r["Tests"] for r in rows) + count_tests("test_lab4_ui.py")
+
+    c1, c2 = st.columns(2)
+    c1.metric("Total tests", total)
+    c2.metric("Labs with ≥5 tests", f"{sum(r['Tests'] >= 5 for r in rows)} / 8")
+    st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
+
+    if st.button("Run pytest -q", type="primary", key="run_pytest"):
+        with st.spinner("Running tests..."):
+            result = subprocess.run(
+                [sys.executable, "-m", "pytest", "-q"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        show = st.success if result.returncode == 0 else st.error
+        show("All tests passed" if result.returncode == 0 else "Some tests failed")
+        st.code(result.stdout[-3000:] or result.stderr[-3000:])
+
+    st.markdown("**Quality checks** (run in terminal):")
+    st.code("py -m pytest -q\npy -m black --check .\npy -m ruff check .")
 
 
 def page_about():
     st.title("About FinManager")
-    st.write("A financial management project built with Python and Streamlit.")
+    st.write(
+        "A single-page finance manager: accounts, categories, transactions, "
+        "budgets, events and reports. Written in functional style: pure "
+        "functions, immutable data, closures, recursion, memoization, "
+        "Maybe/Either, lazy generators, FRP, composition and async."
+    )
+
+    st.subheader("Stack")
+    st.write("Python 3.11+ · Streamlit · pytest · black · ruff")
+
+    st.subheader("Labs and where to click")
+    st.dataframe(
+        pd.DataFrame(
+            [{"Lab": num, "Topic": topic, "Menu": menu} for num, topic, menu, _ in LABS]
+        ),
+        hide_index=True,
+        width="stretch",
+    )
+
+    st.subheader("Team")
+    st.markdown(
+        "- **Malik**: `app/core/*` (all labs), tests, `seed.json`, "
+        "Streamlit UI for labs 7–8, Tests and About pages\n"
+        "- **Askar**: Streamlit UI in `app/main.py`: Overview, Data, Reports, "
+        "theme, integration with `core`"
+    )
+
+    st.subheader("Run")
+    st.code("py -m pip install -r requirements.txt\npy -m streamlit run app/main.py")
 
 
 GREEN = "#3FA95C"
@@ -1646,6 +1793,7 @@ def page_reports():
                         st.markdown(f"✅ {name}")
     top_categories_view()
     services_report_view()
+    final_report_view()
 
 
 def show_steps(steps):
@@ -1723,6 +1871,52 @@ def services_report_view():
         monthly_report_view(cats, trans, budgets)
     with tab2:
         category_report_view(cats, trans)
+
+
+def final_report_view():
+    _, cats, trans, _ = get_data()
+    names = {c.id: c.name for c in cats}
+    path = STATE_PATH if STATE_PATH.exists() else SEED_PATH
+    first = date.fromisoformat(min(t.ts for t in trans)[:10])
+    last = date.fromisoformat(max(t.ts for t in trans)[:10])
+
+    st.divider()
+    st.subheader("Final report (one click)")
+    st.caption("load → filter → lazy top → cached forecast → async → budgets")
+
+    c1, c2 = st.columns(2)
+    start = c1.date_input("From", first, key="final_from")
+    end = c2.date_input("To", last, key="final_to")
+
+    if st.button("Build final report", type="primary", key="final_build"):
+        st.session_state.final = asyncio.run(
+            final_report(str(path), start.isoformat(), f"{end.isoformat()}T23:59:59")
+        )
+
+    report = st.session_state.get("final")
+    if report is None:
+        st.info("Press the button to build the report.")
+        return
+
+    st.markdown(" → ".join(f"**{name}** ({count})" for name, count in report["steps"]))
+
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Balance", money(report["balance"]))
+    m2.metric("Expenses", money(report["expenses"]))
+    m3.metric("Over budget", len(report["over_budget"]))
+
+    for b in report["over_budget"]:
+        st.error(
+            f"{b['month']} · {b['error']} {money(b['spent'])} of {money(b['limit'])}"
+        )
+
+    left, right = st.columns(2)
+    left.markdown("**Top categories (lazy)**")
+    for cat_id, value in report["top_categories"]:
+        left.write(f"{names.get(cat_id, cat_id)}: {money(value)}")
+    right.markdown("**Forecast per category (cached)**")
+    for cat_id, value in report["forecast"].items():
+        right.write(f"{names.get(cat_id, cat_id)}: {money(value)}")
 
 
 PAGES = {
