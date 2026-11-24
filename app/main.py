@@ -1647,6 +1647,7 @@ def page_reports():
     top_categories_view()
     services_report_view()
 
+
 def show_steps(steps):
     for i, (name, value) in enumerate(steps):
         size = f"{len(value)} transactions" if isinstance(value, tuple) else value
@@ -1667,12 +1668,12 @@ def monthly_report_view(cats, trans, budgets):
     if not months:
         st.info("No transactions yet.")
         return
-    
+
     month = st.selectbox("Month", months, key="lab7_month")
 
     service = BudgetService(
         validators=(tree_budget_check(cats),),
-        calculators=(total_spent, spent_by_category), 
+        calculators=(total_spent, spent_by_category),
         trans=trans,
         budgets=budgets,
     )
