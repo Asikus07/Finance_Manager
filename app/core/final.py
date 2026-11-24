@@ -3,7 +3,7 @@ import asyncio
 from core.ftypes import Left
 from core.lazy import lazy_top_categories
 from core.memo import forecast_expenses
-from core.parallel import balance_forecast, expensess_by_month
+from core.parallel import balance_forecast, expenses_by_month
 from core.report import in_month, tree_budget_check
 from core.transforms import account_balance, by_date_range, load_seed
 
@@ -14,7 +14,7 @@ async def final_report(
     accounts, cats, trans, budgets = load_seed(path)
 
     chosen = tuple(filter(by_date_range(start, end), trans))
-    months = tuple(sorted({t.ts[:7]} for t in chosen))
+    months = tuple(sorted({t.ts[:7] for t in chosen}))
 
     top = tuple(lazy_top_categories(iter(chosen), cats, k))
 
@@ -22,7 +22,7 @@ async def final_report(
     forecast = {c.id: forecast_expenses(c.id, trans, period) for c in roots}
 
     spent, balances = await asyncio.gather(
-        expensess_by_month(chosen, months, delay),
+        expenses_by_month(chosen, months, delay),
         balance_forecast(accounts, trans, delay),
     )
 

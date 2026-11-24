@@ -13,7 +13,7 @@ async def month_total(
     return month, total_spent(in_month(month)(trans))
 
 
-async def expensess_by_month(
+async def expenses_by_month(
     trans: tuple[Transaction, ...], months: tuple[str, ...], delay: float = 0.0
 ) -> dict[str, int]:
     pairs = await asyncio.gather(*(month_total(trans, m, delay) for m in months))
